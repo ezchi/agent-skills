@@ -31,31 +31,33 @@ endif()
 
 set(TARGET_NAME {{exe_name}})
 
-# 1. Define the executable with your C++ testbench
-add_executable(${TARGET_NAME}
-  main.cpp
-)
+# 1. Define the executable
+#    For C++ testbench: add your main.cpp
+#    For SystemVerilog testbench: leave empty (verilate --main will provide the entry point)
+add_executable(${TARGET_NAME} {{main_cpp_if_exists}})
 
-target_compile_features(${TARGET_NAME} PRIVATE cxx_std_17)
+# 2. Use C++20 if using Verilator --timing (highly recommended for SV testbenches)
+target_compile_features(${TARGET_NAME} PRIVATE cxx_std_20)
 
-# 2. Define a dedicated output directory for Verilator generated files
+# 3. Define a dedicated output directory for Verilator generated files
 #    This prevents header-not-found issues by keeping generated files in a known location.
 set(VERILATOR_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/verilated_files)
 file(MAKE_DIRECTORY ${VERILATOR_OUT_DIR})
 
-# 3. Add the output directory to the target's include path
-#    This ensures main.cpp can find "V{{top_module}}.h"
+message(STATUS "Verilator Output Directory: ${VERILATOR_OUT_DIR}")
+
+# 4. Add the output directory to the target's include path
+#    This ensures C++ testbenches can find "V{{top_module}}.h"
 target_include_directories(${TARGET_NAME} PRIVATE ${VERILATOR_OUT_DIR} .)
 
-# 4. Invoke Verilator to generate C++ models and attach them to the target
+# 5. Invoke Verilator to generate C++ models and attach them to the target
 verilate(${TARGET_NAME}
   INCLUDE_DIRS "."
   TOP_MODULE {{top_module}}
   PREFIX V{{top_module}}           # Explicitly naming the C++ class is best practice
   DIRECTORY ${VERILATOR_OUT_DIR} # Output to the known directory
   SOURCES ${RTL_SOURCES}
-  VERILATOR_ARGS ${VERILATOR_FLAGS}
+  VERILATOR_ARGS
+    ${VERILATOR_FLAGS}
+    {{main_flag_if_sv_tb}}       # --main if using a SystemVerilog testbench
 )
-
-# Note: If using a pure SystemVerilog testbench (no main.cpp), use --main in VERILATOR_ARGS
-# and remove main.cpp from add_executable.
