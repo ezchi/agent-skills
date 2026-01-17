@@ -34,7 +34,7 @@
    * Reuse code as possible as it can to avoid duplication.
    * Abstract common functionality for reuse.
    
-4. **Fail fast**
+5. **Fail fast**
 
    * Assertions for illegal states.
    * Defensive default assignments.
@@ -127,13 +127,13 @@ state_t state_curr, state_next;
 | Type                          | Convention           | Example               |
 |-------------------------------|----------------------|-----------------------|
 | Clock                         | `clk_<domain>`       | `clk_core`            |
-| Reset (active-low)            | `rst_<domain>_n`     | `rst_core_n`          |
 | Reset (active-high)           | `rst_<domain>`       | `rst_dbg`             |
 | Input                         | `i<name>`            | `iValid`              |
 | Output                        | `o<name>`            | `oReady`              |
 | Internal logic                | `<descriptive_name>` | `fifo_level`          |
 | Current FSM state             | `state_curr`         | `state_curr`          |
 | Next FSM state                | `state_next`         | `state_next`          |
+| State name                    | `S_<name>`           | `S_IDLE`              |
 | Combinational wire            | `<name>_c`           | `grant_c`             |
 | Parameters                    | `P_<NAME>`           | `P_DEPTH`             |
 | Localparams                   | `LP_<NAME>`          | `LP_ADDR_W`           |
@@ -147,9 +147,9 @@ state_t state_curr, state_next;
 
 ```systemverilog
 typedef enum logic [1:0] {
-  STATE_IDLE,
-  STATE_BUSY,
-  STATE_ERR
+  S_IDLE,
+  S_BUSY,
+  S_ERR
 } state_t;
 ```
 
@@ -164,7 +164,7 @@ typedef enum logic [1:0] {
 ```systemverilog
 arb_rr u_arb_rr (
   .clk_core (clk_core),
-  .rst_core_n (rst_core_n)
+  .rst_core (rst_core)
 );
 ```
 
@@ -202,8 +202,8 @@ typedef enum logic [1:0] {
 foo_state_t state_curr;
 foo_state_t state_next;
 
-always_ff @(posedge clk_core or negedge rst_core_n) begin
-  if (!rst_core_n)
+always_ff @(posedge clk_core) begin
+  if (rst_core)
     state_curr <= S_IDLE;
   else
     state_curr <= state_next;
@@ -227,33 +227,6 @@ end
 * `unique case` or `priority case` required
 * All enum values must be covered
 * No combinational outputs driven directly from `state_curr`
-
----
-
-|---------------|---------------|
-| Sequential    | `always_ff`   |
-| Combinational | `always_comb` |
-| Latch         | **Avoid**     |
-
-```systemverilog
-always_ff @(posedge clk_core or negedge rst_core_n) begin
-  if (!rst_core_n)
-    state_q <= STATE_IDLE;
-  else
-    state_q <= state_d;
-end
-```
-
-```systemverilog
-always_comb begin
-  state_d = state_q; // default
-  case (state_q)
-    STATE_IDLE: if (i_valid) state_d = STATE_BUSY;
-    STATE_BUSY: if (done)    state_d = STATE_IDLE;
-    default:    state_d = STATE_IDLE;
-  endcase
-end
-```
 
 ### 4.2 Defaults Are Mandatory
 
@@ -322,7 +295,7 @@ bind fifo_async fifo_async_sva u_fifo_async_sva (.*);
 
 ```systemverilog
 clocking cb @(posedge clk_core);
-  input rst_core_n;
+  input rst_core;
   input i_valid, o_ready;
 endclocking
 ```
@@ -331,8 +304,8 @@ endclocking
 
 ```systemverilog
 property p_valid_eventually_ready;
-  disable iff (!rst_core_n)
-  i_valid |-> ##[1:$] o_ready;
+  disable iff (!rst_core)
+  valid |-> ##[1:$] ready;
 endproperty
 
 a_valid_eventually_ready: assert property (p_valid_eventually_ready);
@@ -414,20 +387,6 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - Assertions observe only, never drive signals
 - Verilator + Cocotb compatible (no exotic SV features)
 - Prefer clarity and maintainability over compactness
-```
-
-```
-You are generating SystemVerilog code following a strict clean-code RTL & verification style:
-- One module per file, snake_case names
-- Explicit clock/reset naming (clk_*, rst_*)
-- always_ff / always_comb only
-- Early default assignments
-- No implicit nets (`default_nettype none)
-- Non-intrusive SVA in separate *_sva.sv files using bind
-- Verilator + Cocotb compatible (no exotic SV features)
-- Assertions observe only, never drive
-- Prefer readability over compactness
-
 ```
 
 ---
