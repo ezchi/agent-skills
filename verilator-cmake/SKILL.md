@@ -6,7 +6,7 @@ description: |
   projects. Includes executable targets, library builds, and C++ harness
   integration.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   depends_on:
     - systemverilog-core
     - systemverilog-tests
@@ -57,16 +57,22 @@ Activate when prompt mentions:
 
 ## Procedure for Creating New CMake Verilator Project
 
-When asked to create a new CMake + Verilator project:
+When asked to create a new CMake + Verilator project, verify you follow the **Robust Header Path** pattern:
 
-1. Create minimum CMake version header
-2. Declare project name and language
-3. Add Verilator package check
-4. Define SystemVerilog source list
-5. Invoke `verilator_generate` or custom command
-6. Create executable simulation target
-7. Link against Verilator libraries
-8. Output valid complete `CMakeLists.txt`
+1.  **Requirement Check**: Ensure `cmake_minimum_required` is at least 3.14 (for `file(MAKE_DIRECTORY)`).
+2.  **Explicit Output Directory**:
+    *   Define a variable `VERILATOR_OUT_DIR` set to `${CMAKE_CURRENT_BINARY_DIR}/verilated_files` (or similar).
+    *   Create this directory using `file(MAKE_DIRECTORY ...)`.
+    *   **Reason**: Verilator's default output location can be unpredictable or deeply nested, causing "header not found" errors.
+3.  **Explicit Includes**:
+    *   Add `target_include_directories(... PRIVATE ${VERILATOR_OUT_DIR})` to the executable target.
+    *   **Reason**: `main.cpp` needs to find `Vtop.h`, which resides in that directory.
+4.  **Explicit Prefix**:
+    *   Always use the `PREFIX V<top_module>` argument in `verilate()`.
+    *   **Reason**: Ensures the generated C++ class name matches standard conventions (`Vmodule`) and avoids collisions or linking errors.
+5.  **Target Definition**:
+    *   Create executable with `add_executable`.
+    *   Attach Verilator sources using `verilate(TARGET_NAME ... DIRECTORY ${VERILATOR_OUT_DIR} ...)`.
 
 ---
 
@@ -75,7 +81,7 @@ When asked to create a new CMake + Verilator project:
 1. Parse the user's current CMakeLists file
 2. Identify `add_executable` or custom verilator command
 3. Add new source files into source list
-4. Preserve user options and comments
+4. **Refactor Check**: If the existing CMakeLists does not use an explicit output directory, recommend or apply the "Robust Header Path" refactoring to prevent future include issues.
 5. Do not break existing targets
 6. Maintain formatting rules from `cmake-style-guide.md`
 
@@ -83,10 +89,8 @@ When asked to create a new CMake + Verilator project:
 
 ## Templates Included
 
-- project-level CMakeLists
-- library build
-- executable verilator build
-- sim_main.cpp harness
+- `CMakeLists.txt` (Updated with robust directory handling)
+- `sim_main.cpp` harness
 
 ---
 
