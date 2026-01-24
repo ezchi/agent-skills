@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Core Principles (Clean Code Applied to SV)
+## Core Principles (Clean Code Applied to SV)
 
 1. **Clarity over cleverness**
 
@@ -41,7 +41,7 @@
 
 ---
 
-## 2. File & Directory Architecture (Scalable & Reusable)
+## File & Directory Architecture (Scalable & Reusable)
 
 The directory structure must support **multiple modules**, **unit tests**, **integration tests**, and **reuse** of both RTL and verification components.
 
@@ -101,9 +101,9 @@ repo/
 
 ---
 
-## 3. Naming Conventions (Clean Code Driven)
+## Naming Conventions (Clean Code Driven)
 
-### 3.1 General Rules
+### General Rules
 
 * Names must answer: **what**, not **how**.
 * Avoid abbreviations unless industry-standard.
@@ -121,8 +121,16 @@ Poor
 ```verilog
 state_t state_curr, state_next;
 ```
+### File Name 
 
-### 3.2 Signals
+| Type      | Suffix   |
+|-----------|----------|
+| Interface | _intf.sv |
+| Package   | _pkg.sv  |
+| Class     | _ct.svh  |
+
+
+### Signals
 
 | Type                          | Convention           | Example               |
 |-------------------------------|----------------------|-----------------------|
@@ -169,10 +177,10 @@ arb_rr u_arb_rr (
 ```
 
 ---
+    
+## RTL Coding Rules (Synthesizable)
 
-## 4. RTL Coding Rules (Synthesizable)
-
-### 4.1 Finite State Machine (FSM) Style (Mandatory)
+### Finite State Machine (FSM) Style (Mandatory)
 
 FSMs must follow a strict, reviewable structure.
 
@@ -228,12 +236,12 @@ end
 * All enum values must be covered
 * No combinational outputs driven directly from `state_curr`
 
-### 4.2 Defaults Are Mandatory
+### Defaults Are Mandatory
 
 * Every `always_comb` must fully assign all outputs.
 * Use **early defaults**.
 
-### 4.3 No Implicit Nets
+### No Implicit Nets
 
 ```systemverilog
 `default_nettype none
@@ -241,7 +249,7 @@ end
 
 Restore at EOF if needed.
 
-### 4.4 Avoid Gotchas
+### Avoid Gotchas
 
 | Gotcha            | Rule                         |
 |-------------------|------------------------------|
@@ -253,7 +261,7 @@ Restore at EOF if needed.
 
 ---
 
-## 5. Parameters & Packages
+## Parameters & Packages
 
 * Put shared types/constants in packages.
 * Avoid `define except for guards.
@@ -266,15 +274,15 @@ endpackage
 
 ---
 
-## 6. Assertions & SVA (Non-Intrusive by Design)
+## Assertions & SVA (Non-Intrusive by Design)
 
-### 6.1 Philosophy
+### Philosophy
 
 * Assertions must **observe only**.
 * Never drive signals.
 * Must be removable without functional impact.
 
-### 6.2 Placement Strategy
+### Placement Strategy
 
 1. **Preferred**: Separate `_sva.sv` file
 2. Bound using `bind`
@@ -283,7 +291,7 @@ endpackage
 bind fifo_async fifo_async_sva u_fifo_async_sva (.*);
 ```
 
-### 6.3 Naming
+### Naming
 
 | Item      | Convention        |
 |-----------|-------------------|
@@ -291,7 +299,7 @@ bind fifo_async fifo_async_sva u_fifo_async_sva (.*);
 | Assertion | `a_<description>` |
 | Cover     | `c_<description>` |
 
-### 6.4 Clocking Blocks
+### Clocking Blocks
 
 ```systemverilog
 clocking cb @(posedge clk_core);
@@ -300,7 +308,7 @@ clocking cb @(posedge clk_core);
 endclocking
 ```
 
-### 6.5 Example Assertion
+### Example Assertion
 
 ```systemverilog
 property p_valid_eventually_ready;
@@ -311,22 +319,22 @@ endproperty
 a_valid_eventually_ready: assert property (p_valid_eventually_ready);
 ```
 
-### 6.6 Verilator Notes
+### Verilator Notes
 
 * Enable with `--assert`.
 * Avoid complex temporal operators with unbounded ranges in hot paths.
 
 ---
 
-## 7. Cocotb & Verilator Compatibility
+## Cocotb & Verilator Compatibility
 
-### 7.1 RTL Rules for Cocotb
+### RTL Rules for Cocotb
 
 * Ports must be **2-state clean** when possible.
 * Avoid force/release semantics.
 * Use simple packed arrays instead of unpacked for ports.
 
-### 7.2 Naming for Python Access
+### Naming for Python Access
 
 ```python
 dut.i_valid.value = 1
@@ -335,14 +343,14 @@ await RisingEdge(dut.clk_core)
 
 Avoid escaped identifiers or hierarchical hacks.
 
-### 7.3 DPI & C++ Interop
+### DPI & C++ Interop
 
 * Keep DPI functions in dedicated files.
 * No side-effects in DPI used by assertions.
 
 ---
 
-## 8. Commenting & Documentation
+## Commenting & Documentation
 
 * Comment **why**, not **what**.
 * Header per file:
@@ -355,7 +363,7 @@ Avoid escaped identifiers or hierarchical hacks.
 
 ---
 
-## 9. Linting & Self-Checks
+## Linting & Self-Checks
 
 ### Mandatory Checks
 
