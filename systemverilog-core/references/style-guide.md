@@ -121,7 +121,13 @@ Poor
 ```verilog
 state_t state_curr, state_next;
 ```
-### File Name 
+### File Name
+
+* **File names must match the entity name** defined inside.
+  * Module `my_module` -> `my_module.sv`
+  * Package `my_pkg` -> `my_pkg.sv`
+  * Class `my_class_ct` -> `my_class_ct.svh`
+  * Interface `my_intf` -> `my_intf.sv`
 
 | Type      | Suffix   |
 |-----------|----------|
@@ -153,16 +159,21 @@ state_t state_curr, state_next;
 
 ### 3.3 User-Defined Types & Enums
 
+* All user-defined types (structs, enums, typedefs) must end with `_t`.
+* Enum values must be uppercase: `THING_<VALUE>`.
+
 ```systemverilog
 typedef enum logic [1:0] {
-  S_IDLE,
-  S_BUSY,
-  S_ERR
+  STATE_IDLE,
+  STATE_BUSY,
+  STATE_ERR
 } state_t;
-```
 
-* Enum names: `<thing>_e`
-* Enum values: `THING_<VALUE>`
+typedef struct packed {
+  logic [31:0] data;
+  logic        valid;
+} packet_t;
+```
 
 ### 3.4 Modules & Instances
 
@@ -269,6 +280,41 @@ Restore at EOF if needed.
 ```systemverilog
 package pkg_types;
   typedef logic [31:0] data_t;
+endpackage
+```
+
+---
+
+## SystemVerilog Classes
+
+Classes are primarily used for verification components (agents, scoreboards, etc.).
+
+### Rules
+
+* **One class per file**.
+* Class names must end with `_ct`.
+* Class definition must be in a file named `<class_name>.svh` (e.g., `my_driver_ct.svh`).
+* Class header files (`*.svh`) **must only** be included inside a SystemVerilog package (`*_pkg.sv`).
+* **All header files (`*.svh`) must be wrapped in `ifndef` guards** to prevent multiple inclusion.
+
+```systemverilog
+// my_driver_ct.svh
+`ifndef MY_DRIVER_CT_SVH
+`define MY_DRIVER_CT_SVH
+
+class my_driver_ct;
+  // ...
+endclass
+
+`endif // MY_DRIVER_CT_SVH
+```
+
+```systemverilog
+package my_component_pkg;
+  // Included classes
+  `include "driver_ct.svh"
+  `include "monitor_ct.svh"
+  `include "agent_ct.svh"
 endpackage
 ```
 
@@ -385,9 +431,14 @@ Avoid escaped identifiers or hierarchical hacks.
 You are generating SystemVerilog code following a strict clean-code RTL & verification style:
 - Scalable repo architecture with reusable RTL and verification modules
 - One module per file, snake_case module names
+- File names must match the entity name (module, package, class, interface)
+- One class per file, named <class_name>.svh (e.g., my_driver_ct.svh)
+- Class names must end with _ct
+- All *.svh files must be wrapped in `ifndef guards
+- Classes must be included ONLY in SystemVerilog packages (*_pkg.sv)
+- All user-defined types (structs, enums, typedefs) must end with _t
 - Explicit clock/reset naming (clk_*, rst_*)
 - FSM state naming: state_curr / state_next
-- User-defined types must end with _t
 - always_ff / always_comb only, one intent per block
 - Early default assignments in all combinational logic
 - No implicit nets (`default_nettype none`)
