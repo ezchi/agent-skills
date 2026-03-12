@@ -254,11 +254,17 @@ end
 
 ### No Implicit Nets
 
+Every SystemVerilog file must start with `` `default_nettype none `` and end with `` `default_nettype wire `` to prevent implicit net declarations and ensure clean compilation units.
+
 ```systemverilog
 `default_nettype none
-```
 
-Restore at EOF if needed.
+module my_module (...);
+  ...
+endmodule
+
+`default_nettype wire
+```
 
 ### Avoid Gotchas
 
