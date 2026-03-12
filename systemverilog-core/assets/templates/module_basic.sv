@@ -1,3 +1,5 @@
+`default_nettype none
+
 module {{module_name}} #(
   parameter integer P_WIDTH = {{width}}
 )(
@@ -11,3 +13,5 @@ module {{module_name}} #(
   // TODO: Insert sequential logic here
 
 endmodule
+
+`default_nettype wire

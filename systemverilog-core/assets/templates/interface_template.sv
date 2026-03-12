@@ -1,3 +1,5 @@
+`default_nettype none
+
 interface {{interface_name}} #(parameter int P_WIDTH = {{width}});
   logic clk;
   logic rst;
@@ -5,3 +7,5 @@ interface {{interface_name}} #(parameter int P_WIDTH = {{width}});
   logic valid;
   logic ready;
 endinterface
+
+`default_nettype wire

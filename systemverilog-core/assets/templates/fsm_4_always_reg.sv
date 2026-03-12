@@ -6,8 +6,11 @@ module {{module_name}} (
     input  logic i_in1,
     input  logic i_in2,
     input  logic i_clk,
-    input  logic i_rst
+input  logic i_rst
 );
+
+logic n_out1;
+logic n_out2; // State_Next combinatorial outputs
 
 // Enumerated state_curr type
 typedef enum logic [1:0] {
@@ -49,27 +52,42 @@ always_comb begin
     endcase
 end
 
-// Registered Output Logic
-// Calculated from 'state_next' state_curr to avoid 1-cycle latency relative to state_curr transition
+// State_Next Output Logic (Combinatorial)
+always_comb begin
+    n_out1 = '0;
+    n_out2 = '0;
+
+    case (state_curr)
+        S_IDLE: begin
+            if (i_in1) n_out1 = '1;
+        end
+
+        S_STATE_1: begin
+            n_out1 = '1;
+        end
+
+        S_STATE_2: begin
+            if (!i_in2) begin
+                n_out2 = '1;
+            end
+            else begin
+                n_out1 = '1;
+            end
+        end
+
+        default: {n_out1, n_out2} = 'x;
+    endcase
+end
+
+// Output Register
 always_ff @(posedge i_clk) begin
     if (i_rst) begin
         o_out1 <= '0;
         o_out2 <= '0;
     end
     else begin
-        // Default assignments
-        o_out1 <= '0;
-        o_out2 <= '0;
-
-        // Re-implementing specific Example 16 logic for correctness with the paper's style:
-        case (state_next)
-            S_IDLE:    begin
-                if (state_curr == S_STATE_2 && !i_in2) o_out2 <= '1;
-            end
-            S_STATE_1: o_out1 <= '1;
-            S_STATE_2: o_out1 <= '1;
-            default:   {o_out1, o_out2} <= 'x;
-        endcase
+        o_out1 <= n_out1;
+        o_out2 <= n_out2;
     end
 end
 

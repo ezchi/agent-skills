@@ -1,3 +1,5 @@
+`default_nettype none
+
 module example_fifo #(
   parameter P_WIDTH = 32,
   parameter P_DEPTH = 16
@@ -15,3 +17,5 @@ module example_fifo #(
 // TODO: FIFO logic following style guide
 
 endmodule
+
+`default_nettype wire
