@@ -1,6 +1,6 @@
 # Creating New Agent Skills
 
-This guide explains how to create and integrate a new agent skill into this repository. Following these standards ensures that your skill is compatible with the `install.sh` script and the Gemini CLI's slash command architecture.
+This guide explains how to create and integrate a new agent skill into this repository. Following these standards ensures that your skill is compatible with the `install.sh` script and the agent architectures of both the **Gemini CLI** and **Claude Code**.
 
 ## 1. Automated Creation (Recommended)
 
@@ -24,13 +24,13 @@ Each skill must reside in its own top-level directory. The name of the directory
 ├── SKILL.md             # Mandatory: The main persona and procedures
 ├── assets/              # Optional: Templates, snippets, or boilerplate
 ├── references/          # Optional: Style guides, logic rules, or documentation
-├── commands/            # Optional: TOML files for slash commands
+├── commands/            # Optional: TOML files for slash commands (Gemini Only)
 └── scripts/             # Optional: Helper scripts or automation
 ```
 
 ## 2. Defining the Skill (`SKILL.md`)
 
-The `SKILL.md` file is the heart of the skill. It must start with a YAML metadata block.
+The `SKILL.md` file is the heart of the skill and is compatible with both Gemini and Claude. It must start with a YAML metadata block.
 
 ### **Metadata Template**
 ```yaml
@@ -50,7 +50,7 @@ metadata:
 - **Procedures:** Step-by-step workflows the agent should follow (e.g., "/lint procedure").
 - **Available Resources:** List the files in `assets/` and `references/` so the agent knows what it can read.
 
-## 3. Adding Slash Commands
+## 3. Adding Slash Commands (Gemini CLI)
 
 Slash commands allow users to trigger specific skill workflows easily. Create a `.toml` file in the `commands/` directory for each command.
 
@@ -71,8 +71,9 @@ User input: {{args}}
 ## 4. Integration & Testing
 
 1.  **Update GEMINI.md**: Add your new skill to the "Project Overview" and list its slash commands in the "Slash Commands" section.
-2.  **Test Installation**: Run `./install.sh --project` to verify the skill and commands are correctly copied to `.gemini/`.
-3.  **Reload Commands**: In the Gemini CLI, run `/commands reload` to verify your new slash command appears in the `/help` menu.
+2.  **Test Gemini Installation**: Run `./install.sh --project --gemini` to verify the skill and commands are correctly copied to `.gemini/`.
+3.  **Test Claude Installation**: Run `./install.sh --project --claude` to verify the skill is correctly copied to `.claude/skills/`.
+4.  **Reload Commands**: In the Gemini CLI, run `/commands reload` to verify your new slash command appears in the `/help` menu.
 
 ## 5. Style Guidelines
 

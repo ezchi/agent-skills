@@ -1,20 +1,24 @@
 #!/bin/bash
 
-# Gemini Skill & Command Installer
+# Agent Skill & Command Installer
 
 set -e
 
 REPO_URL="https://github.com/ezchi/agent-skills.git"
-INSTALL_PATH="$HOME/.gemini"
 GLOBAL=true
+AGENT="gemini"
+ALL_SKILLS=false
 TEMP_DIR=""
 
 usage() {
     echo "Usage: $0 [options]"
     echo "Options:"
-    echo "  --project    Install to current project (.gemini/)"
-    echo "  --global     Install to home directory (~/.gemini/) [Default]"
+    echo "  --project    Install to current project (.gemini/ or .claude/)"
+    echo "  --global     Install to home directory (~/.gemini/ or ~/.claude/) [Default]"
     echo "  --all        Install all skills without prompting"
+    echo "  --agent NAME Agent to install for (gemini, claude) [Default: gemini]"
+    echo "  --claude     Alias for --agent claude"
+    echo "  --gemini     Alias for --agent gemini"
     echo "  --help       Show this help message"
 }
 
@@ -30,14 +34,30 @@ trap cleanup EXIT
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        --project) INSTALL_PATH="./.gemini"; GLOBAL=false ;;
-        --global) INSTALL_PATH="$HOME/.gemini"; GLOBAL=true ;;
+        --project) GLOBAL=false ;;
+        --global) GLOBAL=true ;;
         --all) ALL_SKILLS=true ;;
+        --claude) AGENT="claude" ;;
+        --gemini) AGENT="gemini" ;;
+        --agent) AGENT="$2"; shift ;;
         --help) usage; exit 0 ;;
         *) echo "Unknown parameter: $1"; usage; exit 1 ;;
     esac
     shift
 done
+
+# Set installation path based on agent and scope
+if [ "$AGENT" = "claude" ]; then
+    BASE_DIR=".claude"
+else
+    BASE_DIR=".gemini"
+fi
+
+if [ "$GLOBAL" = "true" ]; then
+    INSTALL_PATH="$HOME/$BASE_DIR"
+else
+    INSTALL_PATH="./$BASE_DIR"
+fi
 
 # Check if we are in the repo or need to clone it
 if [ ! -f "install.sh" ] || [ $(find . -maxdepth 2 -name "SKILL.md" | wc -l) -eq 0 ]; then
@@ -53,7 +73,9 @@ if [ ! -f "install.sh" ] || [ $(find . -maxdepth 2 -name "SKILL.md" | wc -l) -eq
 fi
 
 mkdir -p "$INSTALL_PATH/skills"
-mkdir -p "$INSTALL_PATH/commands"
+if [ "$AGENT" = "gemini" ]; then
+    mkdir -p "$INSTALL_PATH/commands"
+fi
 
 # Find available skills (directories with SKILL.md)
 SKILLS=$(find . -maxdepth 2 -name "SKILL.md" | xargs -n1 dirname | sed 's|^\./||' | sort | uniq)
@@ -63,7 +85,7 @@ for skill in $SKILLS; do
     if [ "$skill" == "." ]; then continue; fi
 
     if [ "$ALL_SKILLS" != "true" ]; then
-        printf "Install skill '%s'? [Y/n] " "$skill"
+        printf "Install skill '%s' for %s? [Y/n] " "$skill" "$AGENT"
         read -r confirm
         if [[ $confirm =~ ^[Nn] ]]; then
             continue
@@ -84,8 +106,8 @@ for skill in $SKILLS; do
         rm -rf "$SKILL_TARGET/commands"
     fi
     
-    # Copy commands if they exist
-    if [ -d "$skill/commands" ]; then
+    # Copy commands if they exist and we are installing for Gemini
+    if [ "$AGENT" = "gemini" ] && [ -d "$skill/commands" ]; then
         echo "Installing commands for $skill..."
         
         # Get absolute path to skills directory for the TOML files
@@ -106,11 +128,9 @@ done
 
 echo ""
 echo "Installation complete!"
-if [ "$GLOBAL" = "true" ]; then
-    echo "Skills and commands installed to $HOME/.gemini"
-else
-    # Resolve relative path for clear reporting
-    FULL_PATH=$(mkdir -p "$INSTALL_PATH" && cd "$INSTALL_PATH" && pwd)
-    echo "Skills and commands installed to $FULL_PATH"
+FULL_INSTALL_PATH=$(mkdir -p "$INSTALL_PATH" && cd "$INSTALL_PATH" && pwd)
+echo "Skills and configurations installed for $AGENT to: $FULL_INSTALL_PATH"
+
+if [ "$AGENT" = "gemini" ]; then
+    echo "Run '/commands reload' in Gemini CLI to activate new slash commands."
 fi
-echo "Run '/commands reload' in Gemini CLI to activate new slash commands."

@@ -1,10 +1,14 @@
 # Gemini CLI Agent Skills: Hardware Engineering
 
-A collection of specialized [Gemini CLI](https://github.com/google/gemini-cli) Agent Skills designed for high-quality **SystemVerilog (SV)** development, RTL design, and **Verilator**-based verification.
+A collection of specialized [Gemini CLI](https://github.com/google/gemini-cli) and [Claude Code](https://claude.ai) Agent Skills designed for high-quality **SystemVerilog (SV)** development, RTL design, and **Verilator**-based verification.
 
 ## 🚀 Overview
 
 These skills provide structured personas, expert workflows, and high-quality templates to ensure hardware designs are readable, maintainable, and compatible with modern engineering tools like Verilator and Cocotb.
+
+### Supported Agents
+- **Gemini CLI**: Full support for skills and custom slash commands.
+- **Claude Code**: Support for skills and custom instructions.
 
 ### Included Skills
 - **`systemverilog-core`**: RTL design following "Clean Code" principles and a strict style guide.
@@ -16,27 +20,39 @@ These skills provide structured personas, expert workflows, and high-quality tem
 
 ## 📦 Installation
 
-You can install these skills and their associated slash commands to your global Gemini CLI configuration or directly to a specific project.
+You can install these skills and their associated configurations to your global agent directory or directly to a specific project.
 
-### Remote Installation (Recommended)
-Install directly from the repository without cloning:
+### Gemini CLI
+The default installation target is the Gemini CLI.
 
 ```bash
-# Install all skills globally (~/.gemini/)
+# Global installation (~/.gemini/)
 curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --all
 
-# Install specific skills to the current project (.gemini/)
+# Project-specific installation (.gemini/)
 curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --project
+```
+
+### Claude Code
+Use the `--claude` flag to install skills to Claude's configuration directory.
+
+```bash
+# Global installation (~/.claude/)
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --claude --all
+
+# Project-specific installation (.claude/)
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --claude --project
 ```
 
 ### Local Installation
 If you have already cloned the repository:
 
 ```bash
-./install.sh --all
+./install.sh --all            # Gemini (default)
+./install.sh --claude --all   # Claude
 ```
 
-*Note: After installation, run `/commands reload` in the Gemini CLI to activate the new slash commands.*
+*Note: After installing for Gemini, run `/commands reload` in the Gemini CLI to activate the new slash commands.*
 
 ## ⌨️ Slash Commands
 

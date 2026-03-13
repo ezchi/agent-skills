@@ -1,6 +1,6 @@
 # Gemini CLI Agent Skills: SystemVerilog & Verilator
 
-This repository contains a suite of specialized **Agent Skills** for the Gemini CLI. These skills provide the personas, procedures, templates, and style guides necessary for high-quality SystemVerilog development, RTL design, and Verilator-based verification workflows.
+This repository contains a suite of specialized **Agent Skills** for the Gemini CLI and Claude Code. These skills provide the personas, procedures, templates, and style guides necessary for high-quality SystemVerilog development, RTL design, and Verilator-based verification workflows.
 
 ## Project Overview
 
@@ -8,6 +8,7 @@ The project is structured as a collection of modular skills, each focusing on a 
 
 *   **`systemverilog-core`**: The foundational skill for RTL design. It enforces "Clean Code" principles for SystemVerilog, providing templates for modules, FSMs, and interfaces.
 *   **`systemverilog-tests`**: Specialized in generating testbenches, including basic harnesses and self-checking environments compatible with Verilator.
+*   **`cocotb-verilator-tests`**: Generates Cocotb-based Python testbenches and regression scripts for Verilator simulations.
 *   **`verilator`**: Provides deep expertise in Verilator-specific SystemVerilog constraints, optimization, and debugging of C++ conversion issues.
 *   **`verilator-cmake`**: Automates the creation and maintenance of CMake build systems for Verilator projects, ensuring portable and reproducible builds.
 *   **`verilator-simflow`**: Manages end-to-end simulation tasks, from running single tests to executing full regressions and generating waveforms.
@@ -34,18 +35,26 @@ All skills and generated code must adhere to the **SystemVerilog Style Guide** (
 
 ## Installation
 
-You can install the skills and their associated slash commands to your global Gemini CLI configuration or to a specific project.
+You can install the skills and their associated configurations to your global agent environment or to a specific project.
 
-### Remote Installation (via curl)
-
-You can install the skills and commands directly from the repository without cloning it first:
+### Gemini CLI (Default)
 
 ```bash
-# Install all skills globally
+# Install all skills globally (~/.gemini/)
 curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --all
 
-# Install specific skills to the current project
+# Install to current project (.gemini/)
 curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --project
+```
+
+### Claude Code
+
+```bash
+# Install all skills globally (~/.claude/)
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --claude --all
+
+# Install to current project (.claude/)
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --claude --project
 ```
 
 ### Local Installation
@@ -54,9 +63,9 @@ The script will:
 1.  Discover all skills in the repository.
 2.  Optionally prompt you for each skill.
 3.  Copy the skill files (`SKILL.md`, `assets/`, `references/`) to the target `skills/` directory.
-4.  Register custom slash commands by copying TOML files to the target `commands/` directory.
+4.  For Gemini, register custom slash commands by copying TOML files to the target `commands/` directory.
 
-## Slash Commands
+## Slash Commands (Gemini CLI Only)
 
 Once installed, the following slash commands are available to streamline your SystemVerilog development:
 
@@ -70,7 +79,7 @@ Once installed, the following slash commands are available to streamline your Sy
 ### Verilator
 - `/sv-verilator-check <file>`: Check for Verilator-specific compatibility issues.
 
-*Note: After installation or modification, run `/commands reload` in the Gemini CLI to update the registered commands.*
+*Note: After installation or modification, run `/commands reload` in the Gemini CLI to activate the new slash commands.*
 
 ## Development Workflows
 
