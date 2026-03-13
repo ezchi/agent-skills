@@ -2,7 +2,20 @@
 
 This guide explains how to create and integrate a new agent skill into this repository. Following these standards ensures that your skill is compatible with the `install.sh` script and the Gemini CLI's slash command architecture.
 
-## 1. Directory Structure
+## 1. Automated Creation (Recommended)
+
+The Gemini CLI includes a built-in **`skill-creator`** skill that can bootstrap the necessary files for you. To use it, simply ask:
+
+> "Create a new skill called '<skill-name>'"
+
+**What happens next:**
+1.  The agent will activate the `skill-creator` skill.
+2.  It will generate the directory structure and a base `SKILL.md` with the required metadata.
+3.  It will create empty `assets/`, `references/`, and `scripts/` directories.
+
+*Note: After the automated creation, you must still follow the manual steps below to add **slash commands** and ensure **relative path portability** for this repository.*
+
+## 2. Manual Directory Structure
 
 Each skill must reside in its own top-level directory. The name of the directory should match the skill name (use `kebab-case`).
 
