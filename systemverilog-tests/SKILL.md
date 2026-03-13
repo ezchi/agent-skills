@@ -62,12 +62,15 @@ When generating a testbench:
    - clock generator
    - reset generator
    - **watchdog/timeout process (mandatory to prevent simulation hangs)**
+   - **`delay_cc(int n)` task for consistent cycle-based delays (if not using an interface).**
 4. Build stimulus process:
    - **Drive and sample data ONLY on `posedge clk` unless explicitly requested otherwise.**
+   - **Use `delay_cc(n)` for all clock-cycle delays; prefer the task defined within the interface (e.g., `vif.delay_cc(n)`) over a local testbench task.**
 5. Build checkers or assertions
 6. Add `$display` summary result
-7. Ensure Verilator compatibility according to `references/verilator-compatibility.md`
-8. Return a complete compilable testbench
+7. **Run `delay_cc(2)` before `$finish` to ensure waveform clarity.**
+8. Ensure Verilator compatibility according to `references/verilator-compatibility.md`
+9. Return a complete compilable testbench
 
 ---
 
@@ -76,7 +79,10 @@ When generating a testbench:
 1. Check naming conventions from `test-style-guide.md`
 2. **Verify a watchdog/timeout is present to prevent infinite simulation hangs.**
 3. **Check for `negedge clk` usage; flag if not explicitly requested.**
-4. Ensure no unsynthesizable constructs inside DUT
+4. **Ensure `delay_cc(n)` is used for all cycle-based delays instead of `@(posedge clk)`.**
+5. **If an interface with a clock is used, verify it defines a `delay_cc(int n)` task.**
+6. **Ensure `delay_cc(2)` is run after the last stimulus/check before `$finish`.**
+7. Ensure no unsynthesizable constructs inside DUT
 5. Remove delays inside assertions if needed
 6. Improve stimulus readability
 7. Add missing reset sequencing

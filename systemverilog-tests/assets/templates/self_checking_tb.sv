@@ -9,5 +9,6 @@ initial begin
         $display("TEST FAIL");
     end
 
+    delay_cc(2);
     $finish;
 end

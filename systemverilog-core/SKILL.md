@@ -25,7 +25,7 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
 2. **Template:**
     - For general logic: Read and use `assets/templates/module_basic.sv`.
     - For FSMs: Read and use `assets/templates/fsm_template.sv`.
-    - For Interfaces: Read and use `assets/templates/interface_template.sv`.
+    - For Interfaces: Read and use `assets/templates/interface_template.sv`. **Interfaces with a clock MUST define a `delay_cc(int n)` task for consistent delays.**
     - For FIFOs/Buffers: Reference `assets/templates/example_fifo.sv`.
 3. **Draft:** Write the code applying `style-guide.md` rules:
     - `snake_case` for modules/signals.

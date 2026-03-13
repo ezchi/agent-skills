@@ -26,5 +26,9 @@
 - avoid magic numbers
 - use parameters and localparams
 - **Clock Edge Usage: Do NOT drive or sample data on `negedge clk` unless specifically requested.**
+- **Waveform Clarity: Run `delay_cc(2)` before calling `$finish` to ensure last signals are clearly visible.**
+- **Clock Delays: ALWAYS use `delay_cc(n)` task; DO NOT use `@(posedge clk)` or `repeat(n) @(posedge clk)` in stimulus.**
+- **Interface Priority: Prefer `interface_inst.delay_cc(n)` over a local testbench `delay_cc(n)` if an interface is available.**
+- **Interface Consistency: Interfaces with a clock MUST define a `delay_cc(int n)` task.**
 - do not use `#1` delay scattering for behavior
 - assertions for protocol and reset correctness

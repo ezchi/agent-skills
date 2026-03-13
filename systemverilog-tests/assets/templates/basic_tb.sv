@@ -43,6 +43,8 @@ initial begin
 
     // TODO: stimulus here
     #1us;
+
+    delay_cc(2);
     $finish;
 end
 
