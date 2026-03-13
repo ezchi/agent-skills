@@ -9,7 +9,8 @@ These skills provide structured personas, expert workflows, and high-quality tem
 ### Included Skills
 - **`systemverilog-core`**: RTL design following "Clean Code" principles and a strict style guide.
 - **`systemverilog-tests`**: Generation of basic and self-checking SV testbenches.
-- **`verilator`**: Expertise in Verilator-specific constraints, optimization, and C++ conversion.
+- **`cocotb-verilator-tests`**: Generation of Cocotb Python testbenches and Pytest runners for Verilator.
+- **`verilator`**: Expertise in Verilator-specific conversion, optimization, and C++ pitfalls.
 - **`verilator-cmake`**: Automation of CMake build systems for Verilator projects.
 - **`verilator-simflow`**: End-to-end simulation management, regressions, and waveform tracing.
 
@@ -54,6 +55,7 @@ Once installed, use these commands to streamline your hardware development workf
 
 We welcome new skills! Please refer to the **[CONTRIBUTING_SKILLS.md](./CONTRIBUTING_SKILLS.md)** guide for instructions on:
 - Using the built-in `skill-creator` to bootstrap new skills.
+- Packaging skills with **`./pack_skills.sh`**.
 - Defining custom slash commands.
 - Ensuring path portability for the installation script.
 
