@@ -4,9 +4,10 @@
 
 set -e
 
-# Default to global installation
+REPO_URL="https://github.com/ezchi/agent-skills.git"
 INSTALL_PATH="$HOME/.gemini"
 GLOBAL=true
+TEMP_DIR=""
 
 usage() {
     echo "Usage: $0 [options]"
@@ -16,6 +17,15 @@ usage() {
     echo "  --all        Install all skills without prompting"
     echo "  --help       Show this help message"
 }
+
+cleanup() {
+    if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
+        echo "Cleaning up temporary files..."
+        rm -rf "$TEMP_DIR"
+    fi
+}
+
+trap cleanup EXIT
 
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
@@ -28,6 +38,19 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
+
+# Check if we are in the repo or need to clone it
+if [ ! -f "install.sh" ] || [ $(find . -maxdepth 2 -name "SKILL.md" | wc -l) -eq 0 ]; then
+    echo "Skills not found locally. Preparing remote installation..."
+    if ! command -v git >/dev/null 2>&1; then
+        echo "Error: git is required for remote installation."
+        exit 1
+    fi
+    TEMP_DIR=$(mktemp -d)
+    echo "Cloning repository to $TEMP_DIR..."
+    git clone --depth 1 "$REPO_URL" "$TEMP_DIR"
+    cd "$TEMP_DIR"
+fi
 
 mkdir -p "$INSTALL_PATH/skills"
 mkdir -p "$INSTALL_PATH/commands"
@@ -53,8 +76,7 @@ for skill in $SKILLS; do
     SKILL_TARGET="$INSTALL_PATH/skills/$skill"
     mkdir -p "$SKILL_TARGET"
     
-    # Copy skill files (using a temporary directory to avoid copying the command folder into the skill target)
-    # We use rsync if available, otherwise cp -r and manual cleanup
+    # Copy skill files
     if command -v rsync >/dev/null 2>&1; then
         rsync -a --exclude='commands/' "$skill/" "$SKILL_TARGET/"
     else
@@ -76,6 +98,8 @@ echo "Installation complete!"
 if [ "$GLOBAL" = "true" ]; then
     echo "Skills and commands installed to $HOME/.gemini"
 else
-    echo "Skills and commands installed to $INSTALL_PATH"
+    # Resolve relative path for clear reporting
+    FULL_PATH=$(mkdir -p "$INSTALL_PATH" && cd "$INSTALL_PATH" && pwd)
+    echo "Skills and commands installed to $FULL_PATH"
 fi
 echo "Run '/commands reload' in Gemini CLI to activate new slash commands."

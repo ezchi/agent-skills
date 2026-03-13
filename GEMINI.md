@@ -36,17 +36,19 @@ All skills and generated code must adhere to the **SystemVerilog Style Guide** (
 
 You can install the skills and their associated slash commands to your global Gemini CLI configuration or to a specific project.
 
-### Using the Install Script
+### Remote Installation (via curl)
 
-The provided `install.sh` script automates the installation process:
+You can install the skills and commands directly from the repository without cloning it first:
 
 ```bash
-# Install all skills globally (~/.gemini/)
-./install.sh --all
+# Install all skills globally
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --all
 
-# Install specific skills to the current project (.gemini/)
-./install.sh --project
+# Install specific skills to the current project
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --project
 ```
+
+### Local Installation
 
 The script will:
 1.  Discover all skills in the repository.
