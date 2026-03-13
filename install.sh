@@ -73,9 +73,7 @@ if [ ! -f "install.sh" ] || [ $(find . -maxdepth 2 -name "SKILL.md" | wc -l) -eq
 fi
 
 mkdir -p "$INSTALL_PATH/skills"
-if [ "$AGENT" = "gemini" ]; then
-    mkdir -p "$INSTALL_PATH/commands"
-fi
+mkdir -p "$INSTALL_PATH/commands"
 
 # Find available skills (directories with SKILL.md)
 SKILLS=$(find . -maxdepth 2 -name "SKILL.md" | xargs -n1 dirname | sed 's|^\./||' | sort | uniq)
@@ -106,21 +104,29 @@ for skill in $SKILLS; do
         rm -rf "$SKILL_TARGET/commands"
     fi
     
-    # Copy commands if they exist and we are installing for Gemini
-    if [ "$AGENT" = "gemini" ] && [ -d "$skill/commands" ]; then
-        echo "Installing commands for $skill..."
-        
-        # Get absolute path to skills directory for the TOML files
+    # Copy commands if they exist
+    if [ -d "$skill/commands" ]; then
+        # Get absolute path to skills directory for path substitution
         ABS_SKILLS_DIR=$(mkdir -p "$INSTALL_PATH/skills" && cd "$INSTALL_PATH/skills" && pwd)
-        
-        for cmd_file in "$skill/commands"/*.toml; do
-            [ -e "$cmd_file" ] || continue
-            dest_file="$INSTALL_PATH/commands/$(basename "$cmd_file")"
-            
-            # Replace placeholder with absolute path
-            # Using | as sed delimiter to handle paths safely
-            sed "s|__SKILLS_DIR__|$ABS_SKILLS_DIR|g" "$cmd_file" > "$dest_file"
-        done
+
+        if [ "$AGENT" = "gemini" ]; then
+            echo "Installing Gemini commands for $skill..."
+            for cmd_file in "$skill/commands"/*.toml; do
+                [ -e "$cmd_file" ] || continue
+                dest_file="$INSTALL_PATH/commands/$(basename "$cmd_file")"
+                # Replace __SKILLS_DIR__ placeholder with absolute path
+                sed "s|__SKILLS_DIR__|$ABS_SKILLS_DIR|g" "$cmd_file" > "$dest_file"
+            done
+        elif [ "$AGENT" = "claude" ]; then
+            echo "Installing Claude commands for $skill..."
+            SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+            for cmd_file in "$skill/commands"/*.toml; do
+                [ -e "$cmd_file" ] || continue
+                base="$(basename "$cmd_file" .toml)"
+                dest_file="$INSTALL_PATH/commands/${base}.md"
+                "$SCRIPT_DIR/toml_to_claude_cmd.sh" "$cmd_file" "$dest_file" "$ABS_SKILLS_DIR"
+            done
+        fi
     fi
     
     echo "Successfully installed $skill"
@@ -133,4 +139,6 @@ echo "Skills and configurations installed for $AGENT to: $FULL_INSTALL_PATH"
 
 if [ "$AGENT" = "gemini" ]; then
     echo "Run '/commands reload' in Gemini CLI to activate new slash commands."
+elif [ "$AGENT" = "claude" ]; then
+    echo "Slash commands installed to $FULL_INSTALL_PATH/commands/ — use /command-name in Claude Code."
 fi
