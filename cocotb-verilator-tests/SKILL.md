@@ -48,7 +48,7 @@ Activate this skill when users request:
 ### Templates
 
 - `assets/templates/test_dut.py` - Standard Cocotb testbench template
-- `assets/templates/Makefile` - Standard Makefile for Cocotb + Verilator
+- `assets/templates/runner.py` - Pytest runner using cocotb_tools.runner
 
 ### References
 

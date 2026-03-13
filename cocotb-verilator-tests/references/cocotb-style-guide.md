@@ -6,6 +6,10 @@
 - Clocks should be generated using `cocotb.clock.Clock`.
 - Avoid using delays like `Timer(10, "ns")` for synchronization in synchronous logic. Instead, always synchronize to the clock edge using `await RisingEdge(dut.clk)`.
 
+## Project Structure & Runners
+- **Pytest Runner:** Prefer `cocotb_tools.runner` via a Python script (e.g., `runner.py` or `conftest.py`) over a legacy `Makefile`.
+- **Command Line:** Run simulations with `pytest -s runner.py` or just `pytest`.
+
 ## Best Practices
 - **Timeouts:** All tests must have a `timeout_time` specified in the `@cocotb.test()` decorator to prevent simulation hangs.
 - **Waveform Clarity:** Run at least 2 extra clock cycles using `await delay_cc(dut, 2)` before the test completes.
