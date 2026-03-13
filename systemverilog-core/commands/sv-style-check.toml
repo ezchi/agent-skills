@@ -1,7 +1,7 @@
 description = "Analyze SV code for style violations"
 prompt = """
 Analyze the SystemVerilog code in {{args}} for violations of the style guide.
-Style Guide: @{../skills/systemverilog-core/references/style-guide.md}
+Style Guide: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 
 Check:
 - Naming conventions

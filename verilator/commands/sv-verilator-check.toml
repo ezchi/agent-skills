@@ -1,7 +1,7 @@
 description = "Check SV code for Verilator compatibility"
 prompt = """
 Check the SystemVerilog code in {{args}} for Verilator compatibility issues.
-Reference: @{../skills/verilator/SKILL.md}
+Reference: !{cat __SKILLS_DIR__/verilator/SKILL.md}
 
 Check for:
 - Dynamic arrays/queues slicing issues

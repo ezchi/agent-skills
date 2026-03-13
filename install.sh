@@ -87,7 +87,18 @@ for skill in $SKILLS; do
     # Copy commands if they exist
     if [ -d "$skill/commands" ]; then
         echo "Installing commands for $skill..."
-        cp -r "$skill/commands/"* "$INSTALL_PATH/commands/"
+        
+        # Get absolute path to skills directory for the TOML files
+        ABS_SKILLS_DIR=$(mkdir -p "$INSTALL_PATH/skills" && cd "$INSTALL_PATH/skills" && pwd)
+        
+        for cmd_file in "$skill/commands"/*.toml; do
+            [ -e "$cmd_file" ] || continue
+            dest_file="$INSTALL_PATH/commands/$(basename "$cmd_file")"
+            
+            # Replace placeholder with absolute path
+            # Using | as sed delimiter to handle paths safely
+            sed "s|__SKILLS_DIR__|$ABS_SKILLS_DIR|g" "$cmd_file" > "$dest_file"
+        done
     fi
     
     echo "Successfully installed $skill"

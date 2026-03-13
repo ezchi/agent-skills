@@ -1,7 +1,7 @@
 description = "Review SV code for clean-code principles"
 prompt = """
 Review the SystemVerilog code in {{args}} for Clean Code principles.
-Reference: @{../skills/systemverilog-core/references/style-guide.md}
+Reference: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 
 Check for:
 - Single responsibility (long blocks)

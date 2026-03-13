@@ -1,7 +1,7 @@
 description = "Check SVA files for best practices"
 prompt = """
 Check the SystemVerilog Assertions (SVA) in {{args}} for best practices.
-Reference: @{../skills/systemverilog-core/references/style-guide.md}
+Reference: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 
 Ensure:
 - Assertions are observation-only (no driving signals)

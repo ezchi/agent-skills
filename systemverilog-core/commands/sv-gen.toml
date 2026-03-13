@@ -1,8 +1,8 @@
 description = "Generate SystemVerilog RTL following strict clean-code style"
 prompt = """
 Generate SystemVerilog RTL for {{args}} following the strict clean-code style.
-Reference: @{../skills/systemverilog-core/references/style-guide.md}
-Template: @{../skills/systemverilog-core/assets/templates/module_basic.sv}
+Reference: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
+Template: !{cat __SKILLS_DIR__/systemverilog-core/assets/templates/module_basic.sv}
 
 Ensure:
 - snake_case for modules/signals
