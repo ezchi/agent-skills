@@ -125,17 +125,19 @@ state_t state_curr, state_next;
 ### File Name
 
 * **File names must match the entity name** defined inside.
-  * Module `my_module` -> `my_module.sv`
-  * Package `my_pkg` -> `my_pkg.sv`
-  * Class `my_class_ct` -> `my_class_ct.svh`
-  * Interface `my_intf` -> `my_intf.sv`
+* **Mandatory Suffixes**: Every file MUST use the appropriate suffix for its type to be valid.
+  * Module: `<module_name>.sv`
+  * Package: `<package_name>_pkg.sv`
+  * Class: `<class_name>_ct.svh`
+  * Interface: `<interface_name>_intf.sv`
+  * Testbench: `<module_name>_tb.sv`
 
-| Type      | Suffix   |
-|-----------|----------|
-| Interface | _intf.sv |
-| Package   | _pkg.sv  |
-| Class     | _ct.svh  |
-| Testbench | _tb.sv   |
+| Type      | Suffix   | Example             |
+|-----------|----------|---------------------|
+| Interface | _intf.sv | `axi_stream_intf.sv`|
+| Package   | _pkg.sv  | `core_pkg.sv`       |
+| Class     | _ct.svh  | `driver_ct.svh`     |
+| Testbench | _tb.sv   | `fifo_tb.sv`        |
 
 
 ### Signals

@@ -5,8 +5,9 @@ Reference: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 Template: !{cat __SKILLS_DIR__/systemverilog-core/assets/templates/module_basic.sv}
 
 Ensure:
+- File naming suffixes (_tb.sv, _intf.sv, _pkg.sv, _ct.svh)
 - snake_case for modules/signals
-- clk_*, rst_* naming
+- clk, rst naming (or i_clk, i_rst for ports)
 - One module per file
 - No implicit nets (default_nettype none)
 """
