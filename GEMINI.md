@@ -32,6 +32,44 @@ All skills and generated code must adhere to the **SystemVerilog Style Guide** (
     *   No implicit nets: Always start files with `` `default_nettype none ``.
 *   **Tool Compatibility**: Optimized for **Verilator**, **Cocotb**, and standard synthesis tools.
 
+## Installation
+
+You can install the skills and their associated slash commands to your global Gemini CLI configuration or to a specific project.
+
+### Using the Install Script
+
+The provided `install.sh` script automates the installation process:
+
+```bash
+# Install all skills globally (~/.gemini/)
+./install.sh --all
+
+# Install specific skills to the current project (.gemini/)
+./install.sh --project
+```
+
+The script will:
+1.  Discover all skills in the repository.
+2.  Optionally prompt you for each skill.
+3.  Copy the skill files (`SKILL.md`, `assets/`, `references/`) to the target `skills/` directory.
+4.  Register custom slash commands by copying TOML files to the target `commands/` directory.
+
+## Slash Commands
+
+Once installed, the following slash commands are available to streamline your SystemVerilog development:
+
+### SystemVerilog Core
+- `/sv-gen <description>`: Generate SV RTL following clean-code style.
+- `/sv-style-check <file>`: Analyze code for style guide violations (naming, FSMs, etc.).
+- `/sv-synth-check <file>`: Assessment of synthesis risks (latches, non-synth constructs).
+- `/sv-sva-check <file>`: Review SVA files for best practices.
+- `/sv-clean-code <file>`: Review code for Clean Code principles (Single Responsibility, etc.).
+
+### Verilator
+- `/sv-verilator-check <file>`: Check for Verilator-specific compatibility issues.
+
+*Note: After installation or modification, run `/commands reload` in the Gemini CLI to update the registered commands.*
+
 ## Development Workflows
 
 ### 1. RTL Generation (`systemverilog-core`)

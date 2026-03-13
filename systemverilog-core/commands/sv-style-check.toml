@@ -1,0 +1,13 @@
+description = "Analyze SV code for style violations"
+prompt = """
+Analyze the SystemVerilog code in {{args}} for violations of the style guide.
+Style Guide: @{../skills/systemverilog-core/references/style-guide.md}
+
+Check:
+- Naming conventions
+- FSM state naming (state_curr/next)
+- _t suffix for types
+- Width consistency
+
+Output a list of violations and refactoring suggestions.
+"""

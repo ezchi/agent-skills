@@ -1,0 +1,10 @@
+description = "Check SV code for Verilator compatibility"
+prompt = """
+Check the SystemVerilog code in {{args}} for Verilator compatibility issues.
+Reference: @{../skills/verilator/SKILL.md}
+
+Check for:
+- Dynamic arrays/queues slicing issues
+- Complex streaming operators
+- Dependency ordering risks
+"""

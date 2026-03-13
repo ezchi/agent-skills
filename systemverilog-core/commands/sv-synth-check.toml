@@ -1,0 +1,11 @@
+description = "Check RTL for synthesis risks"
+prompt = """
+Check the RTL in {{args}} for synthesis risks.
+Reference: @{../skills/systemverilog-core/references/style-guide.md}
+
+Check for:
+- Non-synthesizable constructs (initial, # delays)
+- Inferred latches
+- Reset completeness
+- Combinational loops
+"""
