@@ -17,7 +17,7 @@ module fifo_tb;
   // reset
   initial begin
     clk = 0;
-    rst_n = 1;
+    rst = 1;
     #20 rst = 0;
   end
 

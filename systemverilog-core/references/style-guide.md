@@ -138,12 +138,12 @@ state_t state_curr, state_next;
 
 ### Signals
 
-| Type                          | Convention           | Example               |
-|-------------------------------|----------------------|-----------------------|
-| Clock                         | `clk_<domain>`       | `clk_core`            |
-| Reset (active-high)           | `rst_<domain>`       | `rst_dbg`             |
-| Input                         | `i<name>`            | `iValid`              |
-| Output                        | `o<name>`            | `oReady`              |
+| Type                          | Convention               | Example               |
+|-------------------------------|--------------------------|-----------------------|
+| Clock                         | `clk` (or `clk_<domain>`) | `clk`, `clk_core`     |
+| Reset (active-high)           | `rst` (or `rst_<domain>`) | `rst`, `rst_dbg`      |
+| Input                         | `i_<name>`           | `i_valid`             |
+| Output                        | `o_<name>`           | `o_ready`             |
 | Internal logic                | `<descriptive_name>` | `fifo_level`          |
 | Current FSM state             | `state_curr`         | `state_curr`          |
 | Next FSM state                | `state_next`         | `state_next`          |

@@ -25,7 +25,7 @@ endtask : cc
 task automatic reset_pulse();
     rst <= 1;
     delay_cc(5);
-    rst_n <= 1;
+    rst <= 0;
 endtask
 
 // DUT instance
