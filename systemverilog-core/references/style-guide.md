@@ -478,6 +478,7 @@ Checks:
 - `_t` suffix for all user-defined types
 - One module per file
 - Consistent indentation and alignment
+- Minimum width for counters and registers (no over-sizing)
 
 Output:
 - List of violations with line numbers
