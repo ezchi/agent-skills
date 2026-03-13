@@ -7,7 +7,7 @@ Template: !{cat __SKILLS_DIR__/systemverilog-core/assets/templates/module_basic.
 Ensure:
 - File naming suffixes (_tb.sv, _intf.sv, _pkg.sv, _ct.svh)
 - snake_case for modules/signals
-- clk, rst naming (or i_clk, i_rst for ports)
+- clk, rst, reset naming (or i_clk, i_rst, i_reset for ports)
 - One module per file
 - No implicit nets (default_nettype none)
 """

@@ -5,7 +5,8 @@ Style Guide: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 
 Check:
 - File naming suffixes (_tb.sv, _intf.sv, _pkg.sv, _ct.svh)
-- Naming conventions (signals, modules, instances)
+- Naming conventions (signals, modules, instances, ports)
+- Clock & Reset naming (clk, rst, reset, or i_clk, i_rst, i_reset for ports)
 - FSM state naming (state_curr/next)
 - _t suffix for types
 - Width consistency

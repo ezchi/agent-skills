@@ -29,7 +29,7 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - For FIFOs/Buffers: Reference `assets/templates/example_fifo.sv`.
 3. **Draft:** Write the code applying `style-guide.md` rules:
     - `snake_case` for modules/signals.
-    - `clk_<domain>`, `rst_<domain>` naming.
+    - `clk_<domain>`, `rst_<domain>` naming (or `i_clk`, `i_rst`, `i_reset` for ports).
     - Explicit `state_curr`, `state_next` FSMs.
     - `always_ff` and `always_comb` only.
     - Follow minimum width rules (e.g., 12-bit for MTU pkt_len_t).

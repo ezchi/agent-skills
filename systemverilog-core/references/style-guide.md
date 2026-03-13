@@ -144,8 +144,8 @@ state_t state_curr, state_next;
 
 | Type                          | Convention               | Example               |
 |-------------------------------|--------------------------|-----------------------|
-| Clock                         | `clk` (or `clk_<domain>`) | `clk`, `clk_core`     |
-| Reset (active-high)           | `rst` (or `rst_<domain>`) | `rst`, `rst_dbg`      |
+| Clock                         | `clk` (or `clk_<domain>`) | `i_clk`, `clk_core`   |
+| Reset                         | `rst` or `reset`         | `i_rst`, `i_reset`    |
 | Input                         | `i_<name>`           | `i_valid`             |
 | Output                        | `o_<name>`           | `o_ready`             |
 | Internal logic                | `<descriptive_name>` | `fifo_level`          |
@@ -155,10 +155,12 @@ state_t state_curr, state_next;
 | Combinational wire            | `<name>_c`           | `grant_c`             |
 | Parameters                    | `P_<NAME>`           | `P_DEPTH`             |
 | Localparams                   | `LP_<NAME>`          | `LP_ADDR_W`           |
-| Interface                     | `<name>_intf`        | `mac_10g_rx_intf`     |
+| Interface                     | `<name_intf>`        | `mac_10g_rx_intf`     |
 | Instance of interface         | `<name>_if`          | `rx_if`               |
 | Instance of virtual interface | `<name>_vif`         | `rx_vif`              |
 | Package                       | `<name>_pkg`         | `formatter_utils_pkg` |
+
+**Note on Clock & Reset Ports**: When clock and reset are module ports, they **MUST** follow the `i_` or `o_` prefix rule (e.g., `i_clk`, `i_rst`, `i_reset`). Internal clock/reset signals or top-level signals may omit the prefix (e.g., `clk`, `rst`).
 
 
 ### 3.3 User-Defined Types & Enums
@@ -455,8 +457,8 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - All *.svh files must be wrapped in `ifndef guards
 - Classes must be included ONLY in SystemVerilog packages (*_pkg.sv)
 - All user-defined types (structs, enums, typedefs) must end with _t
-- Explicit clock/reset naming (clk, rst)
-- Input/Output naming (i_*, o_*) for module ports only
+- Explicit clock/reset naming (clk, rst, reset)
+- Input/Output naming (i_*, o_*) for module ports only (including clocks and resets)
 - FSM state naming: state_curr / state_next
 - always_ff / always_comb only, one intent per block
 - Early default assignments in all combinational logic
