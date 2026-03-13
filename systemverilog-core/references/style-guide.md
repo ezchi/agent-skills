@@ -111,6 +111,7 @@ repo/
 * Use active high reset by default.
 * Use synchronous reset by default.
 * One definition per line.
+* **`i_` and `o_` prefixes are strictly for module ports.** Do not use them for task/function arguments or internal local variables.
 Good
 ```verilog
 state_t state_curr;
@@ -134,6 +135,7 @@ state_t state_curr, state_next;
 | Interface | _intf.sv |
 | Package   | _pkg.sv  |
 | Class     | _ct.svh  |
+| Testbench | _tb.sv   |
 
 
 ### Signals
@@ -182,8 +184,8 @@ typedef struct packed {
 
 ```systemverilog
 arb_rr u_arb_rr (
-  .clk_core (clk_core),
-  .rst_core (rst_core)
+  .i_clk (clk),
+  .i_rst (rst)
 );
 ```
 
@@ -229,8 +231,8 @@ typedef enum logic [1:0] {
 foo_state_t state_curr;
 foo_state_t state_next;
 
-always_ff @(posedge clk_core) begin
-  if (rst_core)
+always_ff @(posedge clk) begin
+  if (rst)
     state_curr <= S_IDLE;
   else
     state_curr <= state_next;
@@ -241,7 +243,7 @@ always_comb begin
 
   unique case (state_curr)
     S_IDLE: if (i_start) state_next = S_BUSY;
-    S_BUSY: if (done)    state_next = S_IDLE;
+    S_BUSY: if (i_done)  state_next = S_IDLE;
     S_ERR:               state_next = S_IDLE;
     default:             state_next = S_IDLE;
   endcase
@@ -451,7 +453,8 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - All *.svh files must be wrapped in `ifndef guards
 - Classes must be included ONLY in SystemVerilog packages (*_pkg.sv)
 - All user-defined types (structs, enums, typedefs) must end with _t
-- Explicit clock/reset naming (clk_*, rst_*)
+- Explicit clock/reset naming (clk, rst)
+- Input/Output naming (i_*, o_*) for module ports only
 - FSM state naming: state_curr / state_next
 - always_ff / always_comb only, one intent per block
 - Early default assignments in all combinational logic

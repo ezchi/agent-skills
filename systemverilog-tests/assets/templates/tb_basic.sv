@@ -18,7 +18,7 @@ end
 
 task automatic delay_cc(input int cycles);
     repeat (cycles) @(posedge clk);
-endtask : cc
+endtask : delay_cc
 
 
 // Reset

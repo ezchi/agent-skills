@@ -6,7 +6,7 @@ module {{module_name}} (
     input  logic i_in1,
     input  logic i_in2,
     input  logic i_clk,
-input  logic i_rst
+    input  logic i_rst
 );
 
 // Enumerated state_curr type
@@ -20,13 +20,13 @@ typedef enum logic [1:0] {
 state_t state_curr;
 state_t state_next;
 
-// State_Curr Register
+// State Register
 always_ff @(posedge i_clk) begin
     if (i_rst) state_curr <= S_IDLE;
     else       state_curr <= state_next;
 end
 
-// State_Next State_Curr and Output Logic
+// Next-State and Output Logic
 always_comb begin
     state_next   = S_XXX; // Pre-default 'x assignment for debug
     o_out1 = '0;    // Default output assignments

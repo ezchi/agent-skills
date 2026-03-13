@@ -20,13 +20,13 @@ typedef enum logic [1:0] {
 state_t state_curr;
 state_t state_next;
 
-// State_Curr Register
+// State Register
 always_ff @(posedge i_clk) begin
     if (i_rst) state_curr <= S_IDLE;
     else       state_curr <= state_next;
 end
 
-// State_Next State_Curr Logic
+// Next-State Logic
 always_comb begin
     state_next = S_XXX; // Pre-default 'x assignment
 
@@ -50,7 +50,7 @@ always_comb begin
 end
 
 // Registered Output Logic
-// Calculated from 'state_next' state_curr to avoid 1-cycle latency relative to state_curr transition
+// Calculated from 'state_next' to avoid 1-cycle latency relative to state_curr transition
 always_ff @(posedge i_clk) begin
     if (i_rst) begin
         o_out1 <= '0;
