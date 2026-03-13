@@ -191,6 +191,14 @@ arb_rr u_arb_rr (
     
 ## RTL Coding Rules (Synthesizable)
 
+
+### Minimum Width Rules (Resource Efficiency)
+
+Always follow the minimum width rules for SystemVerilog RTL design to optimize resources.
+*   Match bit-widths exactly to the required range.
+*   For standard Ethernet MTU (up to 4095 bytes), a 12-bit width (`[11:0]`) is sufficient.
+*   Use custom types (e.g., `pkt_len_t`) to enforce consistent widths across the design.
+
 ### Finite State Machine (FSM) Style (Mandatory)
 
 FSMs must follow a strict, reviewable structure.

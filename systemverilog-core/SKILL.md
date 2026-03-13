@@ -32,6 +32,7 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - `clk_<domain>`, `rst_<domain>` naming.
     - Explicit `state_curr`, `state_next` FSMs.
     - `always_ff` and `always_comb` only.
+    - Follow minimum width rules (e.g., 12-bit for MTU pkt_len_t).
 4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches).
 
 ### 2. Review & Refactor (`/sv-style-check`, `/sv-clean-code`)
