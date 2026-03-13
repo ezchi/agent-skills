@@ -85,6 +85,10 @@ Once installed, the following slash commands are available to streamline your Sy
 - **Run**: Execute simulation binaries, capturing logs and analyzing for `TEST PASS/FAIL`.
 - **Regression**: Automate batch runs, summarizing results and generating waveforms on failure.
 
+## Contributing
+
+If you'd like to contribute a new skill to this repository, please see the **[CONTRIBUTING_SKILLS.md](./CONTRIBUTING_SKILLS.md)** guide for detailed instructions on the required file structure and metadata.
+
 ## Usage in Gemini CLI
 
 These skills are designed to be activated via the `activate_skill` tool when relevant hardware engineering tasks are identified.
