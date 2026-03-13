@@ -9,8 +9,8 @@ module {{module_name}} #(
   output logic [P_WIDTH-1:0] o_dout
 );
 
-  // TODO: Insert combinational logic here
-  // TODO: Insert sequential logic here
+  // Combinational logic here
+  // Sequential logic here
 
 endmodule
 

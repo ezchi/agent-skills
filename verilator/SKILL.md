@@ -1,5 +1,5 @@
 ---
-name: Verilator 
+name: verilator-expert
 description: Specialized knowledge for configuring, compiling, and writing SystemVerilog compatible with Verilator.
 ---
 

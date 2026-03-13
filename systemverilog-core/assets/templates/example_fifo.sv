@@ -14,7 +14,7 @@ module example_fifo #(
   output logic o_empty
 );
 
-// TODO: FIFO logic following style guide
+// FIFO logic implementation here
 
 endmodule
 

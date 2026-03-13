@@ -41,7 +41,7 @@ endtask
 initial begin
     reset_pulse();
 
-    // TODO: stimulus here
+    // Apply stimulus sequences
     #1us;
 
     delay_cc(2);
