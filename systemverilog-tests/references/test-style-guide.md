@@ -22,7 +22,9 @@
 ## Best Practices
 
 - self-checking wherever possible
+- **MANDATORY: include a timeout watchdog (e.g., `#10ms $error("Simulation Timeout"); $finish;`)**
 - avoid magic numbers
 - use parameters and localparams
+- **Clock Edge Usage: Do NOT drive or sample data on `negedge clk` unless specifically requested.**
 - do not use `#1` delay scattering for behavior
 - assertions for protocol and reset correctness

@@ -16,6 +16,13 @@ initial begin
     forever #0.5 clk = ~clk;
 end
 
+// Watchdog
+initial begin
+    #1ms;
+    $error("Simulation timeout reached!");
+    $finish;
+end
+
 task automatic delay_cc(input int cycles);
     repeat (cycles) @(posedge clk);
 endtask : delay_cc

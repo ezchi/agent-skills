@@ -14,6 +14,13 @@ module fifo_tb;
   // clock
   always #5 clk = ~clk;
 
+  // watchdog
+  initial begin
+    #100ms;
+    $error("FIFO Simulation Timeout!");
+    $finish;
+  end
+
   // reset
   initial begin
     clk = 0;

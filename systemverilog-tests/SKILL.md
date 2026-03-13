@@ -61,7 +61,9 @@ When generating a testbench:
 3. Create:
    - clock generator
    - reset generator
-4. Build stimulus process
+   - **watchdog/timeout process (mandatory to prevent simulation hangs)**
+4. Build stimulus process:
+   - **Drive and sample data ONLY on `posedge clk` unless explicitly requested otherwise.**
 5. Build checkers or assertions
 6. Add `$display` summary result
 7. Ensure Verilator compatibility according to `references/verilator-compatibility.md`
@@ -72,11 +74,13 @@ When generating a testbench:
 ## Testbench Review Procedure
 
 1. Check naming conventions from `test-style-guide.md`
-2. Ensure no unsynthesizable constructs inside DUT
-3. Remove delays inside assertions if needed
-4. Improve stimulus readability
-5. Add missing reset sequencing
-6. Suggest coverage or assertions
+2. **Verify a watchdog/timeout is present to prevent infinite simulation hangs.**
+3. **Check for `negedge clk` usage; flag if not explicitly requested.**
+4. Ensure no unsynthesizable constructs inside DUT
+5. Remove delays inside assertions if needed
+6. Improve stimulus readability
+7. Add missing reset sequencing
+8. Suggest coverage or assertions
 
 ---
 
