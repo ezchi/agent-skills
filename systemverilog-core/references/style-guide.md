@@ -167,6 +167,8 @@ state_t state_curr, state_next;
 
 * All user-defined types (structs, enums, typedefs) must end with `_t`.
 * Enum values must be uppercase: `THING_<VALUE>`.
+* **Always use `packed` for structs and unions** unless explicitly required otherwise (e.g., for DPI-C interop or tool-specific constraints). Unpacked structs are not synthesizable in a portable way and cause Verilator warnings.
+* **Always group related signals into a `typedef struct packed`**. If two or more signals travel together (e.g., valid + data, address + burst + size), define a struct to carry them. This reduces port clutter, prevents signal mismatches, and improves readability.
 
 ```systemverilog
 typedef enum logic [1:0] {
@@ -179,6 +181,36 @@ typedef struct packed {
   logic [31:0] data;
   logic        valid;
 } packet_t;
+```
+
+#### Grouping Related Signals (Mandatory)
+
+When multiple signals share a logical relationship, they **must** be grouped into a packed struct. Do not pass them as separate ports or declare them as loose signals.
+
+Good — related signals grouped:
+```systemverilog
+typedef struct packed {
+  logic [31:0] addr;
+  logic [7:0]  len;
+  logic [2:0]  size;
+  logic        valid;
+} axi_ar_req_t;
+
+module read_controller (
+  input  axi_ar_req_t i_ar_req,
+  output logic        o_ar_ready
+);
+```
+
+Poor — related signals declared separately:
+```systemverilog
+module read_controller (
+  input  logic [31:0] i_ar_addr,
+  input  logic [7:0]  i_ar_len,
+  input  logic [2:0]  i_ar_size,
+  input  logic        i_ar_valid,
+  output logic        o_ar_ready
+);
 ```
 
 ### 3.4 Modules & Instances
@@ -197,6 +229,32 @@ arb_rr u_arb_rr (
     
 ## RTL Coding Rules (Synthesizable)
 
+
+### Packed Arrays and Structs (Mandatory)
+
+* **Always use packed arrays** (`logic [N-1:0]`) instead of unpacked arrays for ports and synthesizable signals. Unpacked arrays have limited tool support and are not portable across simulators and synthesis tools.
+* **Always use `packed` qualifier on structs and unions** in RTL code. Packed structs map directly to bit vectors, making them safe for ports, assignments, and concatenation.
+* Unpacked arrays are only permitted for memories/register files where tool-specific inference is required, or when explicitly requested.
+
+Good:
+```systemverilog
+logic [3:0][7:0] data_bytes;  // packed array of 4 bytes
+
+typedef struct packed {
+  logic [15:0] payload;
+  logic [3:0]  tag;
+} tagged_data_t;
+```
+
+Poor:
+```systemverilog
+logic [7:0] data_bytes [0:3];  // unpacked — avoid unless memory inference needed
+
+typedef struct {               // missing packed — not portable
+  logic [15:0] payload;
+  logic [3:0]  tag;
+} tagged_data_t;
+```
 
 ### Minimum Width Rules (Resource Efficiency)
 
@@ -466,6 +524,8 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - Non-intrusive SVA in separate *_sva.sv files using bind
 - Assertions observe only, never drive signals
 - Verilator + Cocotb compatible (no exotic SV features)
+- Always use packed arrays and packed structs (no unpacked unless explicitly required)
+- Group related signals into typedef struct packed — never pass them as separate loose ports
 - Prefer clarity and maintainability over compactness
 ```
 

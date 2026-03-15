@@ -33,7 +33,10 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - Explicit `state_curr`, `state_next` FSMs.
     - `always_ff` and `always_comb` only.
     - Follow minimum width rules (e.g., 12-bit for MTU pkt_len_t).
-4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches).
+    - Always use `packed` for structs and unions.
+    - Always use packed arrays instead of unpacked arrays for ports and signals.
+    - Group related signals into a `typedef struct packed` — never pass them as separate loose ports.
+4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs).
 
 ### 2. Review & Refactor (`/sv-style-check`, `/sv-clean-code`)
 When asked to review or fix code:
