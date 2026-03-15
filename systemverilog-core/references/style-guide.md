@@ -256,6 +256,42 @@ typedef struct {               // missing packed — not portable
 } tagged_data_t;
 ```
 
+### Memory Block Addressing (Power-of-2 Allocation)
+
+When a design contains multiple logical blocks mapped into a shared memory space, **all blocks must be allocated the same power-of-2 number of entries** (equal to or greater than the largest block's actual need). This guarantees the address is a simple concatenation of `{block_index, element_index}` with uniform field widths — no adders, multipliers, or variable-width decode needed.
+
+* All blocks share the **same** power-of-2 entry count (pad unused entries in smaller blocks).
+* The address is `{block_idx, elem_idx}` — top bits select the block, bottom bits select the element.
+* Define `localparam` for block count and entries-per-block; derive address width with `$clog2`.
+
+Good — uniform power-of-2 allocation, address by concatenation:
+```systemverilog
+// 4 blocks, each allocated 16 entries (2^4), even if some use fewer
+localparam int unsigned LP_NUM_BLOCKS       = 4;
+localparam int unsigned LP_ENTRIES_PER_BLOCK = 16;  // 2^4
+localparam int unsigned LP_BLOCK_IDX_W      = $clog2(LP_NUM_BLOCKS);       // 2
+localparam int unsigned LP_ELEM_IDX_W       = $clog2(LP_ENTRIES_PER_BLOCK); // 4
+localparam int unsigned LP_ADDR_W           = LP_BLOCK_IDX_W + LP_ELEM_IDX_W; // 6
+
+// Address = {block_idx, elem_idx}
+// addr[5:4] = block index,  addr[3:0] = element index
+logic [LP_BLOCK_IDX_W-1:0] block_idx;
+logic [LP_ELEM_IDX_W-1:0]  elem_idx;
+logic [LP_ADDR_W-1:0]      mem_addr;
+
+assign mem_addr = {block_idx, elem_idx};
+```
+
+Poor — different sizes per block, requires adder for base offset:
+```systemverilog
+localparam int unsigned LP_BLOCK_A_ENTRIES = 12;  // not power of 2
+localparam int unsigned LP_BLOCK_B_ENTRIES = 10;  // different size
+
+// Requires: addr = base + idx, where base = 0, 12, 22...
+// This needs an adder — avoid
+assign block_b_addr = LP_BLOCK_A_ENTRIES + block_b_idx;  // adder in critical path
+```
+
 ### Minimum Width Rules (Resource Efficiency)
 
 Always follow the minimum width rules for SystemVerilog RTL design to optimize resources.
@@ -526,6 +562,7 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - Verilator + Cocotb compatible (no exotic SV features)
 - Always use packed arrays and packed structs (no unpacked unless explicitly required)
 - Group related signals into typedef struct packed — never pass them as separate loose ports
+- Multi-block memory: power-of-2 entries per block, address = {block_idx, elem_idx} — no multiply
 - Prefer clarity and maintainability over compactness
 ```
 
