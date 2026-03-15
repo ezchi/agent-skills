@@ -386,15 +386,119 @@ endmodule
 
 ---
 
-## Parameters & Packages
+## Parameters, Constants & Packages
 
-* Put shared types/constants in packages.
-* Avoid `define except for guards.
+### No Magic Numbers (Mandatory)
+
+Every literal number that carries design meaning **must** be replaced with a named `localparam` or `parameter`. Bare literals (other than 0, 1, and simple bit-width specifiers) are not permitted in RTL.
+
+* Use `localparam` for module-internal constants.
+* Use `parameter` for values intended to be overridden at instantiation.
+* Name must describe the **meaning**, not the value.
+* Avoid `` `define`` except for include guards.
+
+Good:
+```systemverilog
+localparam int unsigned LP_FIFO_DEPTH   = 64;
+localparam int unsigned LP_ADDR_W       = $clog2(LP_FIFO_DEPTH);  // 6
+localparam int unsigned LP_TIMEOUT_CC   = 256;  // clock cycles
+
+logic [LP_ADDR_W-1:0] wr_ptr;
+
+if (counter == LP_TIMEOUT_CC) ...
+```
+
+Poor:
+```systemverilog
+logic [5:0] wr_ptr;           // magic width — where does 6 come from?
+
+if (counter == 256) ...        // magic number — what is 256?
+```
+
+### Package Organization (Structured & Reusable)
+
+Packages must be **scoped by functional domain**, not dumped into a single monolithic package. Each package should be independently importable so that a module only pulls in what it needs.
+
+#### Scoping Rules
+
+* **One package per logical domain** — e.g., bus definitions, algorithm parameters, block-specific types.
+* A package should contain **closely related** types, constants, and functions only.
+* If a package grows beyond ~100 lines or spans unrelated concerns, split it.
+* Packages **must not** depend on modules; they may depend on other packages.
+* Keep the dependency chain shallow — avoid deep `import` chains across packages.
+
+#### Naming Convention
+
+* Package name: `<domain>_pkg` (e.g., `axi_pkg`, `dma_pkg`, `eth_common_pkg`).
+* File name: `<domain>_pkg.sv` — must match the package name.
+
+#### Recommended Package Hierarchy
+
+```
+rtl/
+├── common/
+│   ├── types_pkg.sv          # Project-wide primitive typedefs (data_t, addr_t)
+│   └── math_pkg.sv           # Shared utility functions (max, clog2_ceil)
+├── bus/
+│   ├── axi_pkg.sv            # AXI types, constants, enums
+│   └── axi_stream_pkg.sv     # AXI-Stream specific types
+├── blocks/
+│   ├── dma_pkg.sv            # DMA-specific types, register map constants
+│   └── eth_rx_pkg.sv         # Ethernet RX block types and parameters
+```
+
+#### Structure Within a Package
+
+Order contents consistently: imports first, then localparams, then typedefs, then functions.
 
 ```systemverilog
-package pkg_types;
-  typedef logic [31:0] data_t;
+package dma_pkg;
+
+  // ── Imports ──
+  import types_pkg::addr_t;
+  import types_pkg::data_t;
+
+  // ── Constants ──
+  localparam int unsigned LP_NUM_CHANNELS   = 4;
+  localparam int unsigned LP_MAX_BURST_LEN  = 256;
+  localparam int unsigned LP_DESC_ENTRIES    = 16;  // power of 2
+
+  // ── Types ──
+  typedef enum logic [1:0] {
+    DMA_IDLE,
+    DMA_READ,
+    DMA_WRITE,
+    DMA_DONE
+  } dma_state_t;
+
+  typedef struct packed {
+    addr_t                  src_addr;
+    addr_t                  dst_addr;
+    logic [$clog2(LP_MAX_BURST_LEN)-1:0] burst_len;
+  } dma_desc_t;
+
+  // ── Functions ──
+  function automatic logic is_valid_channel(input logic [$clog2(LP_NUM_CHANNELS)-1:0] ch);
+    return ch < LP_NUM_CHANNELS;
+  endfunction
+
 endpackage
+```
+
+#### Import Rules
+
+* Prefer **explicit imports** (`import pkg::symbol`) over wildcard (`import pkg::*`) to keep dependencies visible.
+* Wildcard import is acceptable inside a testbench or when the package is small and tightly coupled.
+
+Good:
+```systemverilog
+import dma_pkg::dma_desc_t;
+import dma_pkg::LP_NUM_CHANNELS;
+```
+
+Acceptable in testbenches:
+```systemverilog
+import dma_pkg::*;
 ```
 
 ---
@@ -563,6 +667,9 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - Always use packed arrays and packed structs (no unpacked unless explicitly required)
 - Group related signals into typedef struct packed — never pass them as separate loose ports
 - Multi-block memory: power-of-2 entries per block, address = {block_idx, elem_idx} — no multiply
+- No magic numbers — use named localparam/parameter for every meaningful literal
+- Packages scoped by functional domain (axi_pkg, dma_pkg) — no monolithic dump packages
+- Prefer explicit imports (import pkg::symbol) over wildcard in RTL
 - Prefer clarity and maintainability over compactness
 ```
 

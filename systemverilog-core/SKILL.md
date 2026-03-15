@@ -37,7 +37,10 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - Always use packed arrays instead of unpacked arrays for ports and signals.
     - Group related signals into a `typedef struct packed` — never pass them as separate loose ports.
     - When mapping multiple blocks into memory, allocate power-of-2 entries per block so addresses are `{block_idx, elem_idx}` — no multiply logic.
-4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs).
+    - No magic numbers — replace every meaningful literal with a named `localparam` or `parameter`.
+    - Organize shared constants and types into domain-scoped packages (`<domain>_pkg`), not one monolithic package.
+    - Prefer explicit imports (`import pkg::symbol`) over wildcard in RTL.
+4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs, no magic numbers).
 
 ### 2. Review & Refactor (`/sv-style-check`, `/sv-clean-code`)
 When asked to review or fix code:
