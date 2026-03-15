@@ -4,6 +4,8 @@ description: |
   Provides end-to-end simulation workflows for Verilator projects, including
   single test execution, regression runs, waveform dumping, and results
   reporting integrated with CMake build systems and testbenches.
+  TRIGGER when: user asks to run a simulation, execute a test, view waveforms, run regression, or debug simulation failures in a Verilator project.
+  DO NOT TRIGGER when: only writing or reviewing RTL/testbench code without running simulations, or editing build files.
 metadata:
   version: "1.0.0"
   depends_on:

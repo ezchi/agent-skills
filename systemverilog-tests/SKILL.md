@@ -4,6 +4,8 @@ description: |
   Provides capabilities for generating, refactoring, and reviewing
   SystemVerilog testbenches, including self-checking tests compatible
   with Verilator simulation workflows.
+  TRIGGER when: creating, modifying, or reviewing SystemVerilog testbench files (`*_tb.sv`), or user asks to write SV-based tests, self-checking testbenches, or stimulus drivers in SystemVerilog.
+  DO NOT TRIGGER when: writing Python/Cocotb tests, editing RTL design files, or working on build infrastructure.
 metadata:
   version: "1.0.0"
   depends_on:

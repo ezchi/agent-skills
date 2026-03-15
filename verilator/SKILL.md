@@ -1,6 +1,9 @@
 ---
 name: verilator-expert
-description: Specialized knowledge for configuring, compiling, and writing SystemVerilog compatible with Verilator.
+description: |
+  Specialized knowledge for configuring, compiling, and writing SystemVerilog compatible with Verilator.
+  TRIGGER when: user encounters Verilator compilation errors/warnings, asks about Verilator-specific SV restrictions, or needs to debug Verilator lint/simulation issues.
+  DO NOT TRIGGER when: writing general RTL without Verilator concerns, editing Python tests, or working on build files.
 ---
 
 # Verilator Development Expert

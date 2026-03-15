@@ -1,6 +1,9 @@
 ---
 name: cocotb-verilator-tests
-description: Generate and manage Cocotb Python testbenches for SystemVerilog RTL modules using Verilator simulator. Use when writing tests in Python for Verilog/SystemVerilog instead of native SystemVerilog testbenches.
+description: |
+  Generate and manage Cocotb Python testbenches for SystemVerilog RTL modules using Verilator simulator. Use when writing tests in Python for Verilog/SystemVerilog instead of native SystemVerilog testbenches.
+  TRIGGER when: creating, modifying, or reviewing Cocotb Python test files (`test_*.py`), or user asks to write Python-based tests for SystemVerilog/Verilog modules, or mentions cocotb/Cocotb.
+  DO NOT TRIGGER when: writing native SystemVerilog testbenches (`*_tb.sv`), editing RTL design files, or working on non-test Python code.
 metadata:
   version: "1.0.0"
 ---

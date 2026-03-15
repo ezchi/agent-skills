@@ -3,6 +3,8 @@ name: systemverilog-core
 description: |
   Core skill for planning SystemVerilog module, generating, refactoring, and reviewing SystemVerilog code
   using templates and a structured style guide.
+  TRIGGER when: creating, modifying, refactoring, or reviewing `.sv`/`.svh` RTL files, or user asks to generate/plan a SystemVerilog module, FSM, interface, or package.
+  DO NOT TRIGGER when: only editing Python testbenches, CMakeLists.txt, C++ harnesses, documentation, or non-RTL files.
 metadata:
   version: "1.1.0"
 ---

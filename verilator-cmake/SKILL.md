@@ -5,6 +5,8 @@ description: |
   supporting build infrastructure for Verilator-based SystemVerilog simulation
   projects. Includes executable targets, library builds, and C++ harness
   integration.
+  TRIGGER when: creating or modifying `CMakeLists.txt` for Verilator projects, writing C++ test harnesses (`tb_*.cpp`), or user asks to set up a Verilator build system.
+  DO NOT TRIGGER when: editing RTL `.sv` files, writing Python/Cocotb tests, or working on non-Verilator CMake projects.
 metadata:
   version: "1.2.0"
   depends_on:
