@@ -42,6 +42,7 @@ Activate this skill when users request:
 2. Ensure timeouts are specified for tests to avoid simulation hangs.
 3. Ensure signals are driven using the appropriate mechanisms (`.value = ...`).
 4. Look for potential race conditions or missing `await` statements.
+5. Check for magic numbers — all meaningful literals must be named constants at the top of the file or in a shared module.
 
 ## Available Resources
 
