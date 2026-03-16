@@ -256,6 +256,43 @@ typedef struct {               // missing packed — not portable
 } tagged_data_t;
 ```
 
+### Semantic Typedefs over Raw Bit Vectors (Mandatory)
+
+Every signal whose width carries domain meaning **must** use a named `typedef` instead of a bare `logic [N:0]`. A raw bit-vector width tells the reader *how wide* but not *what it represents*. A typedef makes the intent self-documenting at every declaration, port, and assignment.
+
+#### Rules
+
+* Define a `typedef` for each distinct semantic quantity (addresses, lengths, tags, channel IDs, etc.).
+* Place the typedef in the appropriate domain-scoped package (`<domain>_pkg`).
+* **Before defining a new type, search existing packages in the repository for a matching typedef.** Reuse it if one already exists — do not create duplicates.
+* Use the typedef consistently across all modules that handle that quantity.
+* The `_t` suffix is mandatory (per the naming convention).
+
+Good — self-documenting types:
+```systemverilog
+// In eth_rx_pkg.sv
+typedef logic [11:0] pkt_len_t;   // Ethernet frame length (up to 4095)
+typedef logic [31:0] ipv4_addr_t; // IPv4 address
+
+// In module ports — the type tells you what it is
+module eth_rx_parser (
+    input  pkt_len_t   i_pkt_len,
+    input  ipv4_addr_t i_src_addr,
+    input  ipv4_addr_t i_dst_addr
+);
+```
+
+Poor — raw bit vectors with no semantic meaning:
+```systemverilog
+module eth_rx_parser (
+    input  logic [11:0] i_pkt_len,   // what is 12 bits?
+    input  logic [31:0] i_src_addr,  // could be data, address, anything
+    input  logic [31:0] i_dst_addr
+);
+```
+
+**Rationale:** A typedef acts as lightweight documentation that is enforced by the compiler. When every 12-bit length is `pkt_len_t`, a width change propagates through a single typedef edit. When every signal is `logic [N:0]`, the reader must trace context to understand meaning, and width changes require grep-and-pray edits across the codebase.
+
 ### No Magic Bit-Slicing on Bundled Signals (Mandatory)
 
 When two or more fields are concatenated into a single `logic [N:0]` signal and accessed via bit-range slicing (e.g., `signal[37:34]`, `signal[33]`, `signal[32]`), they **must** be refactored into a `typedef struct packed`. This applies whenever:
@@ -701,6 +738,7 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - Verilator + Cocotb compatible (no exotic SV features)
 - Always use packed arrays and packed structs (no unpacked unless explicitly required)
 - Group related signals into typedef struct packed — never pass them as separate loose ports
+- Semantic typedefs over raw bit vectors: use named typedefs (pkt_len_t, addr_t) instead of bare logic [N:0] — check existing packages before defining new types
 - No magic bit-slicing: if a signal bundles multiple fields via concatenation, refactor to typedef struct packed — access by name, not bit index
 - Multi-block memory: power-of-2 entries per block, address = {block_idx, elem_idx} — no multiply
 - No magic numbers — use named localparam/parameter for every meaningful literal
