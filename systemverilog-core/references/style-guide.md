@@ -256,6 +256,41 @@ typedef struct {               // missing packed — not portable
 } tagged_data_t;
 ```
 
+### No Magic Bit-Slicing on Bundled Signals (Mandatory)
+
+When two or more fields are concatenated into a single `logic [N:0]` signal and accessed via bit-range slicing (e.g., `signal[37:34]`, `signal[33]`, `signal[32]`), they **must** be refactored into a `typedef struct packed`. This applies whenever:
+
+* The same bit-layout comment (e.g., `// {keep[3:0], sof, eof, data[31:0]}`) appears on more than one port or signal declaration.
+* Consumer code accesses individual fields using numeric bit indices rather than named selectors.
+* The signal crosses a module boundary (port-to-port).
+
+The struct must be defined in the appropriate domain-scoped package and imported explicitly by each module that uses it.
+
+Good:
+```systemverilog
+typedef struct packed {
+    logic [3:0]  keep;  // byte enables
+    logic        sof;   // start of frame
+    logic        eof;   // end of frame
+    logic [31:0] data;  // payload word
+} pkt_word_t;
+
+// In arbiter:
+if (i_raw_data.eof) ...
+o_tx_keep = i_raw_data.keep;
+```
+
+Poor:
+```systemverilog
+input logic [37:0] i_raw_data,  // {keep[3:0], sof, eof, data[31:0]}
+
+// In arbiter:
+if (i_raw_data[32]) ...        // what is bit 32?
+o_tx_keep = i_raw_data[37:34]; // fragile, duplicated across files
+```
+
+**Rationale:** Named field access is self-documenting, eliminates off-by-one errors on bit ranges, and ensures layout changes propagate through the type system rather than requiring manual updates to every consumer. The comment `// {keep[3:0], sof, eof, data[31:0]}` is the struct definition trying to escape — let it.
+
 ### Memory Block Addressing (Power-of-2 Allocation)
 
 When a design contains multiple logical blocks mapped into a shared memory space, **all blocks must be allocated the same power-of-2 number of entries** (equal to or greater than the largest block's actual need). This guarantees the address is a simple concatenation of `{block_index, element_index}` with uniform field widths — no adders, multipliers, or variable-width decode needed.
@@ -666,6 +701,7 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - Verilator + Cocotb compatible (no exotic SV features)
 - Always use packed arrays and packed structs (no unpacked unless explicitly required)
 - Group related signals into typedef struct packed — never pass them as separate loose ports
+- No magic bit-slicing: if a signal bundles multiple fields via concatenation, refactor to typedef struct packed — access by name, not bit index
 - Multi-block memory: power-of-2 entries per block, address = {block_idx, elem_idx} — no multiply
 - No magic numbers — use named localparam/parameter for every meaningful literal
 - Packages scoped by functional domain (axi_pkg, dma_pkg) — no monolithic dump packages
