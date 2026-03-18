@@ -21,6 +21,8 @@ Specialized knowledge for configuring, compiling, and writing SystemVerilog comp
     *   Enable tracing (`--trace`) and automatic main generation (`--main`) for efficient testing of pure SV modules.
 
 ## 2. SystemVerilog Coding Best Practices
+
+*   **Self-Documenting Code First:** Use meaningful names, semantic typedefs, and clear structure so intent is obvious without comments. Only comment *why* (e.g., Verilator workaround rationale), never *what* the code does.
 *   **Dynamic Arrays & Queues:**
     *   **No Variable Slicing:** Verilator does *not* support variable-indexed slicing on dynamic arrays (e.g., `dyn_arr[i +: 4]` is illegal).
     *   **Workaround:** Copy the desired chunk into a fixed-size temporary array or scalar inside a loop, then process that temporary variable.

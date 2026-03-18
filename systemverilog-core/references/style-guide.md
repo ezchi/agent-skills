@@ -688,8 +688,49 @@ Avoid escaped identifiers or hierarchical hacks.
 
 ## Commenting & Documentation
 
-* Comment **why**, not **what**.
-* Header per file:
+### Self-Documenting Code First (Mandatory)
+
+Code must be the primary documentation. Use meaningful names, semantic typedefs, and clear structure so that the intent is obvious without comments. Only add comments when the **why** cannot be expressed in code.
+
+#### Rules
+
+* **Prefer self-documenting code over comments.** If a comment explains *what* code does, refactor the code so the comment is unnecessary — rename signals, extract logic into named wires, use typedefs, or restructure.
+* **Comment why, never what.** The only acceptable comments explain non-obvious intent: design trade-offs, hardware constraints, protocol quirks, workarounds, or references to specifications.
+* **Delete stale comments.** A wrong comment is worse than no comment. When refactoring code, remove or update any comments that no longer apply.
+* **Do not comment obvious code.** `// increment counter` on `counter <= counter + 1` adds noise. Trust the reader to understand basic constructs.
+
+Good — self-documenting names make comments unnecessary:
+```systemverilog
+pkt_len_t bytes_remaining;
+logic     fifo_almost_full;
+
+assign fifo_almost_full = (fifo_level >= LP_ALMOST_FULL_THRESH);
+```
+
+Poor — comment compensates for bad naming:
+```systemverilog
+logic [11:0] cnt;     // remaining bytes in packet
+logic        flag;    // high when FIFO is almost full
+
+assign flag = (lvl >= 48);  // 48 = almost full threshold
+```
+
+Good — comment explains *why*:
+```systemverilog
+// CDC: gray-code the pointer before crossing clock domains
+// to prevent multi-bit glitches (see Cummings SNUG 2008)
+assign wr_ptr_gray = wr_ptr ^ (wr_ptr >> 1);
+```
+
+Poor — comment explains *what*:
+```systemverilog
+// XOR wr_ptr with shifted wr_ptr
+assign wr_ptr_gray = wr_ptr ^ (wr_ptr >> 1);
+```
+
+### File Headers
+
+* Header per file (brief, not redundant with the code):
 
 ```systemverilog
 // Module: fifo_async
@@ -744,6 +785,7 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - No magic numbers — use named localparam/parameter for every meaningful literal
 - Packages scoped by functional domain (axi_pkg, dma_pkg) — no monolithic dump packages
 - Prefer explicit imports (import pkg::symbol) over wildcard in RTL
+- Self-documenting code over comments: use meaningful names, typedefs, and structure; only comment *why*, never *what*
 - Prefer clarity and maintainability over compactness
 ```
 

@@ -37,6 +37,7 @@ Activate this skill when users request:
    - Write a reset routine.
    - Implement asynchronous driver and monitor tasks.
    - Create tests using `@cocotb.test()` with timeouts to prevent hangs.
+   - **Prefer self-documenting code over comments** — use descriptive function/variable names and named constants. Only add comments to explain *why* (e.g., protocol timing, workarounds), never *what* the code does.
 3. **Generate the Makefile:** Provide `assets/templates/Makefile` to run the simulation, properly pointing to Verilator as the `SIM` engine.
 
 ### Reviewing a Cocotb Testbench
@@ -46,6 +47,7 @@ Activate this skill when users request:
 3. Ensure signals are driven using the appropriate mechanisms (`.value = ...`).
 4. Look for potential race conditions or missing `await` statements.
 5. Check for magic numbers — all meaningful literals must be named constants at the top of the file or in a shared module.
+6. **Check for self-documenting code** — flag comments that explain *what* code does; ensure names and structure make intent obvious without comments.
 
 ## Available Resources
 

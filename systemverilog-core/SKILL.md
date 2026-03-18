@@ -44,7 +44,8 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - No magic numbers — replace every meaningful literal with a named `localparam` or `parameter`.
     - Organize shared constants and types into domain-scoped packages (`<domain>_pkg`), not one monolithic package.
     - Prefer explicit imports (`import pkg::symbol`) over wildcard in RTL.
-4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs, no magic numbers, no raw `logic [N:0]` where a semantic typedef exists, no magic bit-slicing on bundled signals).
+    - Prefer self-documenting code over comments — use meaningful names, semantic typedefs, and clear structure; only comment *why*, never *what*.
+4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs, no magic numbers, no raw `logic [N:0]` where a semantic typedef exists, no magic bit-slicing on bundled signals, no "what" comments that duplicate code).
 
 ### 2. Review & Refactor (`/sv-style-check`, `/sv-clean-code`)
 When asked to review or fix code:

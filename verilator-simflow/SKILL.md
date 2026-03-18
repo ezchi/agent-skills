@@ -27,6 +27,8 @@ This skill defines procedures for running Verilator simulations:
 
 It may use CMake or direct Verilator invocation depending on user context.
 
+Generated scripts and configurations must be self-documenting — use descriptive variable/function names; only add comments to explain *why* (e.g., tool quirks, environment constraints), never *what* the code does.
+
 ---
 
 ## Capabilities

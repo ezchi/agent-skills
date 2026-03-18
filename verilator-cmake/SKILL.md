@@ -31,6 +31,7 @@ This skill ensures build files are:
 - reproducible
 - idiomatic CMake
 - compatible with Verilator best practices
+- self-documenting — use descriptive target/variable names; only add comments to explain *why*, never *what*
 
 ---
 

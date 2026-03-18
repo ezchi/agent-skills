@@ -69,7 +69,8 @@ When generating a testbench:
    - **Drive and sample data ONLY on `posedge clk` unless explicitly requested otherwise.**
    - **Use `delay_cc(n)` for all clock-cycle delays; prefer the task defined within the interface (e.g., `vif.delay_cc(n)`) over a local testbench task.**
 5. Build checkers or assertions
-6. Add `$display` summary result
+6. **Prefer self-documenting code over comments** — use descriptive task/function names, meaningful signal names, and named constants. Only add comments to explain *why* (e.g., protocol quirks, timing constraints), never *what* the code does.
+7. Add `$display` summary result
 7. **Run `delay_cc(2)` before `$finish` to ensure waveform clarity.**
 8. Ensure Verilator compatibility according to `references/verilator-compatibility.md`
 9. Return a complete compilable testbench
@@ -79,7 +80,8 @@ When generating a testbench:
 ## Testbench Review Procedure
 
 1. Check naming conventions from `test-style-guide.md`
-2. **Verify a watchdog/timeout is present to prevent infinite simulation hangs.**
+2. **Check for self-documenting code** — flag comments that explain *what* code does (rename or restructure instead); keep only *why* comments.
+3. **Verify a watchdog/timeout is present to prevent infinite simulation hangs.**
 3. **Check for `negedge clk` usage; flag if not explicitly requested.**
 4. **Ensure `delay_cc(n)` is used for all cycle-based delays instead of `@(posedge clk)`.**
 5. **If an interface with a clock is used, verify it defines a `delay_cc(int n)` task.**
