@@ -32,7 +32,8 @@ Activate this skill when users request:
 ### Generating a Cocotb Testbench
 
 1. **Understand the DUT Interface:** Identify clocks, resets, and I/O signals of the SystemVerilog module.
-2. **Generate the Test File:** Use `assets/templates/test_dut.py` as a baseline to create the Cocotb testbench.
+2. **Search for reusable components:** Check existing test files and `sim/cocotb/common/` for shared drivers, monitors, helper functions, and constants. Import and reuse them — do not duplicate.
+3. **Generate the Test File:** Use `assets/templates/test_dut.py` as a baseline to create the Cocotb testbench.
    - Set up the clock generator (`cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())`).
    - Write a reset routine.
    - Implement asynchronous driver and monitor tasks.
@@ -43,7 +44,8 @@ Activate this skill when users request:
 ### Reviewing a Cocotb Testbench
 
 1. Verify naming conventions and structure against `references/cocotb-style-guide.md`.
-2. Ensure timeouts are specified for tests to avoid simulation hangs.
+2. **Check for code reuse** — flag duplicated helper functions, drivers, or constants that already exist in `sim/cocotb/common/` or other test files. Recommend extracting shared logic.
+3. Ensure timeouts are specified for tests to avoid simulation hangs.
 3. Ensure signals are driven using the appropriate mechanisms (`.value = ...`).
 4. Look for potential race conditions or missing `await` statements.
 5. Check for magic numbers — all meaningful literals must be named constants at the top of the file or in a shared module.

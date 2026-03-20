@@ -29,11 +29,13 @@
    * A reader should understand behavior without searching other files.
    * Avoid hidden dependencies via `include or global macros.
 
-4. **Avoid Duplication**
+4. **Reuse first**
 
-   * Reuse code as possible as it can to avoid duplication.
-   * Abstract common functionality for reuse.
-   
+   * Before writing new code, search the codebase for existing modules, functions, types, and packages that already solve the problem or can be extended.
+   * Extract shared logic into reusable modules or packages — do not copy-paste between files.
+   * Place reusable RTL in `rtl/common/` or `rtl/core/`; place reusable verification components in `verif/vip/`.
+   * When a typedef, localparam, or function already exists in a package, import it — do not redefine it.
+
 5. **Fail fast**
 
    * Assertions for illegal states.
@@ -98,6 +100,8 @@ repo/
 * RTL must not depend on verification code.
 * Verification components (agents, scoreboards) must be reusable across testbenches.
 * Unit tests target *one module*; integration tests target *multiple modules*.
+* **Reuse before create:** Before adding a new module, package, or helper, search `rtl/common/`, `rtl/core/`, and existing domain packages for something that already does the job. Extend or parameterize existing code rather than duplicating it.
+* **Keep code organized:** Place shared primitives (FIFOs, arbiters, synchronizers) in `rtl/common/` or `rtl/core/`. Place domain-specific types and constants in `rtl/blocks/<domain>_pkg.sv`. Do not scatter related definitions across unrelated files.
 
 ---
 
@@ -785,6 +789,7 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - No magic numbers — use named localparam/parameter for every meaningful literal
 - Packages scoped by functional domain (axi_pkg, dma_pkg) — no monolithic dump packages
 - Prefer explicit imports (import pkg::symbol) over wildcard in RTL
+- Reuse first: search existing modules, packages, and types before creating new ones; extend or parameterize, don't duplicate
 - Self-documenting code over comments: use meaningful names, typedefs, and structure; only comment *why*, never *what*
 - Prefer clarity and maintainability over compactness
 ```

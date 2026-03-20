@@ -23,7 +23,7 @@ You are an expert SystemVerilog engineer specializing in "Clean Code" principles
 
 ### 1. Generate RTL (`/sv-gen`)
 When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
-1. **Plan:** Identify the module name, ports, parameters, and core logic.
+1. **Plan:** Identify the module name, ports, parameters, and core logic. **Search the codebase for existing modules, packages, types, and functions that can be reused or extended** — do not duplicate what already exists.
 2. **Template:**
     - For general logic: Read and use `assets/templates/module_basic.sv`.
     - For FSMs: Read and use `assets/templates/fsm_template.sv`.
@@ -42,14 +42,15 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - No magic bit-slicing: when a `logic [N:0]` bundles multiple fields accessed via numeric bit indices, refactor to a `typedef struct packed` in the domain package — access fields by name, not bit position.
     - When mapping multiple blocks into memory, allocate power-of-2 entries per block so addresses are `{block_idx, elem_idx}` — no multiply logic.
     - No magic numbers — replace every meaningful literal with a named `localparam` or `parameter`.
-    - Organize shared constants and types into domain-scoped packages (`<domain>_pkg`), not one monolithic package.
+    - Reuse first — search existing packages, modules, and `rtl/common/` before creating new types, helpers, or modules. Import existing definitions; do not redefine them.
+    - Organize shared constants and types into domain-scoped packages (`<domain>_pkg`), not one monolithic package. Keep related definitions together; do not scatter them across unrelated files.
     - Prefer explicit imports (`import pkg::symbol`) over wildcard in RTL.
     - Prefer self-documenting code over comments — use meaningful names, semantic typedefs, and clear structure; only comment *why*, never *what*.
-4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs, no magic numbers, no raw `logic [N:0]` where a semantic typedef exists, no magic bit-slicing on bundled signals, no "what" comments that duplicate code).
+4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs, no magic numbers, no raw `logic [N:0]` where a semantic typedef exists, no magic bit-slicing on bundled signals, no "what" comments that duplicate code, no duplicated types/modules that already exist in the codebase).
 
 ### 2. Review & Refactor (`/sv-style-check`, `/sv-clean-code`)
 When asked to review or fix code:
-1. **Analyze:** Check the code against `references/style-guide.md`.
+1. **Analyze:** Check the code against `references/style-guide.md`. Search the codebase for duplicated logic, types, or constants that should be consolidated.
 2. **Report:** List specific violations with line numbers.
     - *Example:* "Line 10: `always @(posedge clk)` usage violation. Use `always_ff`."
     - *Example:* "Line 15: Implicit net detected. Add `default_nettype none`."

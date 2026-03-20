@@ -59,8 +59,9 @@ Activate this skill when prompts mention:
 When generating a testbench:
 
 1. Parse DUT interface and parameters
-2. Instantiate DUT using `systemverilog-core` style
-3. Create:
+2. **Search existing testbenches and `verif/vip/`** for reusable drivers, monitors, scoreboards, and helper tasks. Import and reuse them instead of writing from scratch.
+3. Instantiate DUT using `systemverilog-core` style
+4. Create:
    - clock generator
    - reset generator
    - **watchdog/timeout process (mandatory to prevent simulation hangs)**
@@ -80,8 +81,9 @@ When generating a testbench:
 ## Testbench Review Procedure
 
 1. Check naming conventions from `test-style-guide.md`
-2. **Check for self-documenting code** — flag comments that explain *what* code does (rename or restructure instead); keep only *why* comments.
-3. **Verify a watchdog/timeout is present to prevent infinite simulation hangs.**
+2. **Check for code reuse** — flag duplicated drivers, monitors, or helper tasks that already exist in `verif/vip/` or other testbenches. Recommend extracting shared logic into reusable components.
+3. **Check for self-documenting code** — flag comments that explain *what* code does (rename or restructure instead); keep only *why* comments.
+4. **Verify a watchdog/timeout is present to prevent infinite simulation hangs.**
 3. **Check for `negedge clk` usage; flag if not explicitly requested.**
 4. **Ensure `delay_cc(n)` is used for all cycle-based delays instead of `@(posedge clk)`.**
 5. **If an interface with a clock is used, verify it defines a `delay_cc(int n)` task.**

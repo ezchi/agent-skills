@@ -58,6 +58,13 @@ Activate when prompt mentions:
 
 ---
 
+## Code Reuse & Organization
+
+* **Reuse before create:** Before adding new CMake functions, macros, or helper scripts, search the existing build system for reusable patterns. Use CMake functions/macros to encapsulate repeated `verilate()` patterns rather than copy-pasting target definitions.
+* **Keep build files organized:** One `CMakeLists.txt` per directory level. Use `add_subdirectory()` for multi-module projects rather than listing all sources in a single root file.
+
+---
+
 ## Procedure for Creating New CMake Verilator Project
 
 When asked to create a new CMake + Verilator project, verify you follow the **Robust Header Path** pattern:

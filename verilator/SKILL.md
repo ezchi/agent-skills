@@ -22,6 +22,7 @@ Specialized knowledge for configuring, compiling, and writing SystemVerilog comp
 
 ## 2. SystemVerilog Coding Best Practices
 
+*   **Reuse First:** Before writing new workaround code or helper functions, search the codebase for existing solutions to the same Verilator limitation. Consolidate Verilator-specific patterns into shared packages or modules rather than scattering them across files.
 *   **Self-Documenting Code First:** Use meaningful names, semantic typedefs, and clear structure so intent is obvious without comments. Only comment *why* (e.g., Verilator workaround rationale), never *what* the code does.
 *   **Dynamic Arrays & Queues:**
     *   **No Variable Slicing:** Verilator does *not* support variable-indexed slicing on dynamic arrays (e.g., `dyn_arr[i +: 4]` is illegal).
