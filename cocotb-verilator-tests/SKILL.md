@@ -51,6 +51,24 @@ Activate this skill when users request:
 5. Check for magic numbers — all meaningful literals must be named constants at the top of the file or in a shared module.
 6. **Check for self-documenting code** — flag comments that explain *what* code does; ensure names and structure make intent obvious without comments.
 
+## Generating `compile_commands.json` for Verilator C++ Code
+
+After running a cocotb test, Verilator leaves a `sim_build/` directory with
+generated C++ and a Makefile (`Vtop.mk`). Use [bear](https://github.com/rizsotto/Bear) to capture compiler
+invocations and produce `compile_commands.json` for clangd / LSP navigation.
+
+```sh
+# 1. Run the test once to generate sim_build/
+python -m pytest common/tests/async_fifo_bram_fwft/test_async_fifo_bram_fwft.py::test_async_fifo_bram_fwft_default
+
+# 2. Force-rebuild under bear to capture compiler commands
+bear -- make -C sim_build -f Vtop.mk -B
+```
+
+`-B` forces make to rebuild all targets so bear can intercept the compiler
+calls. The resulting `compile_commands.json` is written to the current
+working directory.
+
 ## Available Resources
 
 ### Templates
