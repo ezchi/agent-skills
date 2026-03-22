@@ -438,9 +438,13 @@ end
 
 ### No Implicit Nets
 
-Every SystemVerilog file must start with `` `default_nettype none `` and end with `` `default_nettype wire `` to prevent implicit net declarations and ensure clean compilation units.
+`` `default_nettype none `` must be the **first line of SystemVerilog code** in every file, and `` `default_nettype wire `` must be the **last line of SystemVerilog code**. File-header comments and blank lines may precede `` `default_nettype none ``, but no other SV code may appear before it. This prevents implicit net declarations and ensures clean compilation units.
 
 ```systemverilog
+// ============================================================
+// my_module.sv — Brief description
+// ============================================================
+
 `default_nettype none
 
 module my_module (...);
@@ -777,7 +781,7 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - FSM state naming: state_curr / state_next
 - always_ff / always_comb only, one intent per block
 - Early default assignments in all combinational logic
-- No implicit nets (`default_nettype none`)
+- No implicit nets (`` `default_nettype none `` first SV line, `` `default_nettype wire `` last SV line)
 - Non-intrusive SVA in separate *_sva.sv files using bind
 - Assertions observe only, never drive signals
 - Verilator + Cocotb compatible (no exotic SV features)
@@ -883,7 +887,7 @@ Output:
 ## 13. Recommended Defaults
 
 - `timescale 1ns/1ps
-- `default_nettype none
+- `default_nettype none (first SV line) / `default_nettype wire (last SV line)
 - Explicit resets in all sequential logic
 
 ---
