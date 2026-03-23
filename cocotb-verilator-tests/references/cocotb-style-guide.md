@@ -18,6 +18,29 @@
 - **Clock Generators:** Use `cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())`.
 - **Initialization:** Use an explicit reset task. Ensure all control signals have known initial values before releasing reset.
 
+## Reproducible Randomness
+- **Every test file that uses randomness must seed `random` at the top of each test** using a seed derived from the environment or the current time.
+- Use `COCOTB_RANDOM_SEED` environment variable to override the seed for reproducibility. If unset, derive a seed from `time.time_ns()` so each run differs.
+- **Always log the seed** at the start of the test so failures can be reproduced by re-running with `COCOTB_RANDOM_SEED=<value>`.
+- Use the `random_seed` pytest fixture (provided by `conftest.py`) — do not call `random.seed()` manually in tests.
+
+Good:
+```python
+@cocotb.test(timeout_time=500, timeout_unit="us")
+async def test_fifo_random(dut, random_seed):
+    for _ in range(BURST_LEN):
+        dut.i_data.value = random.randint(0, DATA_MASK)
+        ...
+```
+
+Poor:
+```python
+@cocotb.test(timeout_time=500, timeout_unit="us")
+async def test_fifo_random(dut):
+    random.seed(42)  # same values every run — defeats the purpose of randomization
+    ...
+```
+
 ## No Magic Numbers
 - **Every meaningful literal must be a named constant.** Do not scatter bare numbers (other than 0 and 1) across test code. Define them at the top of the file or in a shared constants module.
 - Use descriptive names that convey **meaning**, not the value itself.

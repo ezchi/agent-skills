@@ -39,6 +39,7 @@ Activate this skill when users request:
    - Implement asynchronous driver and monitor tasks.
    - Create tests using `@cocotb.test()` with timeouts to prevent hangs.
    - **Prefer self-documenting code over comments** — use descriptive function/variable names and named constants. Only add comments to explain *why* (e.g., protocol timing, workarounds), never *what* the code does.
+   - **Reproducible randomness:** When tests use `random`, rely on the `random_seed` fixture from `conftest.py`. This seeds `random` from `COCOTB_RANDOM_SEED` (if set) or `time.time_ns()` (so values differ each run) and logs the seed for reproduction. Never call `random.seed()` directly in tests.
 3. **Generate the Makefile:** Provide `assets/templates/Makefile` to run the simulation, properly pointing to Verilator as the `SIM` engine.
 
 ### Reviewing a Cocotb Testbench
@@ -50,6 +51,7 @@ Activate this skill when users request:
 4. Look for potential race conditions or missing `await` statements.
 5. Check for magic numbers — all meaningful literals must be named constants at the top of the file or in a shared module.
 6. **Check for self-documenting code** — flag comments that explain *what* code does; ensure names and structure make intent obvious without comments.
+7. **Check randomness seeding** — flag any direct `random.seed()` calls. Tests must use the `random_seed` fixture so seeds vary per run and are logged for reproducibility.
 
 ## Generating `compile_commands.json` for Verilator C++ Code
 
