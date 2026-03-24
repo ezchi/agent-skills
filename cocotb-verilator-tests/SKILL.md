@@ -40,6 +40,7 @@ Activate this skill when users request:
    - Create tests using `@cocotb.test()` with timeouts to prevent hangs.
    - **Prefer self-documenting code over comments** — use descriptive function/variable names and named constants. Only add comments to explain *why* (e.g., protocol timing, workarounds), never *what* the code does.
    - **Reproducible randomness:** When tests use `random`, rely on the `random_seed` fixture from `conftest.py`. This seeds `random` from `COCOTB_RANDOM_SEED` (if set) or `time.time_ns()` (so values differ each run) and logs the seed for reproduction. Never call `random.seed()` directly in tests.
+   - **Out-of-source build directory:** Use the `build_dir` fixture from `conftest.py` for all `runner.build()` and `runner.test()` calls. This places build artifacts under `<repo_root>/build/cocotb/<test_dir_name>/`, keeping the source tree clean and enabling parallel test execution (`pytest -n auto`). Never hardcode `sim_build` or place build artifacts inside the source directory.
 3. **Generate the Makefile:** Provide `assets/templates/Makefile` to run the simulation, properly pointing to Verilator as the `SIM` engine.
 
 ### Reviewing a Cocotb Testbench
@@ -52,19 +53,22 @@ Activate this skill when users request:
 5. Check for magic numbers — all meaningful literals must be named constants at the top of the file or in a shared module.
 6. **Check for self-documenting code** — flag comments that explain *what* code does; ensure names and structure make intent obvious without comments.
 7. **Check randomness seeding** — flag any direct `random.seed()` calls. Tests must use the `random_seed` fixture so seeds vary per run and are logged for reproducibility.
+8. **Check build directory** — flag any hardcoded `sim_build` paths or in-source build directories. All runners must use the `build_dir` fixture to ensure out-of-source, per-test build isolation.
 
 ## Generating `compile_commands.json` for Verilator C++ Code
 
-After running a cocotb test, Verilator leaves a `sim_build/` directory with
-generated C++ and a Makefile (`Vtop.mk`). Use [bear](https://github.com/rizsotto/Bear) to capture compiler
-invocations and produce `compile_commands.json` for clangd / LSP navigation.
+After running a cocotb test, Verilator leaves generated C++ and a Makefile
+(`Vtop.mk`) in the out-of-source build directory
+(`<repo_root>/build/cocotb/<test_dir_name>/`). Use
+[bear](https://github.com/rizsotto/Bear) to capture compiler invocations and
+produce `compile_commands.json` for clangd / LSP navigation.
 
 ```sh
-# 1. Run the test once to generate sim_build/
+# 1. Run the test once to populate the build directory
 python -m pytest common/tests/async_fifo_bram_fwft/test_async_fifo_bram_fwft.py::test_async_fifo_bram_fwft_default
 
 # 2. Force-rebuild under bear to capture compiler commands
-bear -- make -C sim_build -f Vtop.mk -B
+bear -- make -C build/cocotb/test_async_fifo_bram_fwft -f Vtop.mk -B
 ```
 
 `-B` forces make to rebuild all targets so bear can intercept the compiler
