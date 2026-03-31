@@ -1,5 +1,7 @@
 description = "Review SV code for clean-code principles"
 prompt = """
+Assume the code is wrong. Your job is to find where.
+
 Review the SystemVerilog code in {{args}} for Clean Code principles.
 Reference: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 
@@ -8,4 +10,7 @@ Check for:
 - Local reasoning
 - Clarity over cleverness
 - Hidden coupling
+
+Do not confirm correctness. Only report violations with file, line, and what is wrong.
+If you find nothing, say so in one line — do not pad with praise.
 """

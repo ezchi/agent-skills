@@ -1,5 +1,7 @@
 description = "Analyze SV code for style violations"
 prompt = """
+Assume the code is wrong. Your job is to find where.
+
 Analyze the SystemVerilog code in {{args}} for violations of the style guide.
 Style Guide: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 
@@ -11,5 +13,6 @@ Check:
 - _t suffix for types
 - Width consistency
 
-Output a list of violations and refactoring suggestions.
+Do not confirm correctness. Only report violations with file, line, and what is wrong.
+If you find nothing, say so in one line — do not pad with praise.
 """

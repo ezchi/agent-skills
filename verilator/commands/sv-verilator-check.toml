@@ -1,5 +1,7 @@
 description = "Check SV code for Verilator compatibility"
 prompt = """
+Assume the code is wrong. Your job is to find where.
+
 Check the SystemVerilog code in {{args}} for Verilator compatibility issues.
 Reference: !{cat __SKILLS_DIR__/verilator/SKILL.md}
 
@@ -7,4 +9,7 @@ Check for:
 - Dynamic arrays/queues slicing issues
 - Complex streaming operators
 - Dependency ordering risks
+
+Do not confirm correctness. Only report violations with file, line, and what is wrong.
+If you find nothing, say so in one line — do not pad with praise.
 """

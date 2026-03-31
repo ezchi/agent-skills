@@ -1,5 +1,7 @@
 description = "Check SVA files for best practices"
 prompt = """
+Assume the code is wrong. Your job is to find where.
+
 Check the SystemVerilog Assertions (SVA) in {{args}} for best practices.
 Reference: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 
@@ -7,4 +9,7 @@ Ensure:
 - Assertions are observation-only (no driving signals)
 - Proper 'disable iff' usage
 - Property/assertion naming (p_*, a_*, c_*)
+
+Do not confirm correctness. Only report violations with file, line, and what is wrong.
+If you find nothing, say so in one line — do not pad with praise.
 """

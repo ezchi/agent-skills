@@ -29,10 +29,31 @@ Activate this skill when users request:
 
 ## Procedures
 
+### Test Plan (Mandatory — Before Any Implementation)
+
+Before writing any test code, create and present a test plan for user approval:
+
+1. **Understand the DUT Interface:** Identify clocks, resets, I/O signals, parameters, and operating modes.
+2. **Identify major features to test** — list each functional block, operating mode, protocol, and boundary condition the DUT exposes.
+3. **Define coverage points** — for each feature, specify what must be exercised: input ranges, edge cases, state transitions, error injection, corner cases, and cross-coverage between features.
+4. **Build the test list** — a table with columns:
+
+   | Test Name | Purpose | How to Test |
+   |-----------|---------|-------------|
+   | `test_reset_behavior` | Verify outputs go to known state on reset | Assert all outputs match reset values after reset assertion/deassertion |
+   | … | … | … |
+
+   - **Test Name**: descriptive `snake_case` name prefixed with `test_`.
+   - **Purpose**: one sentence stating what the test proves.
+   - **How to Test**: concrete stimulus and checking strategy (directed values, random sweep, scoreboard comparison, etc.).
+
+5. **Present the plan to the user and wait for approval** before writing any test code.
+
 ### Generating a Cocotb Testbench
 
-1. **Understand the DUT Interface:** Identify clocks, resets, and I/O signals of the SystemVerilog module.
-2. **Search for reusable components:** Check existing test files and `sim/cocotb/common/` for shared drivers, monitors, helper functions, and constants. Import and reuse them — do not duplicate.
+After the test plan is approved:
+
+1. **Search for reusable components:** Check existing test files and `sim/cocotb/common/` for shared drivers, monitors, helper functions, and constants. Import and reuse them — do not duplicate.
 3. **Generate the Test File:** Use `assets/templates/test_dut.py` as a baseline to create the Cocotb testbench.
    - Set up the clock generator (`cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())`).
    - Write a reset routine.
@@ -45,7 +66,8 @@ Activate this skill when users request:
 
 ### Reviewing a Cocotb Testbench
 
-1. Verify naming conventions and structure against `references/cocotb-style-guide.md`.
+1. **Verify a test plan exists** — check that tests correspond to a documented plan with features, coverage points, and test list. Flag any tests that appear ad-hoc or lack traceability to a plan.
+2. Verify naming conventions and structure against `references/cocotb-style-guide.md`.
 2. **Check for code reuse** — flag duplicated helper functions, drivers, or constants that already exist in `sim/cocotb/common/` or other test files. Recommend extracting shared logic.
 3. Ensure timeouts are specified for tests to avoid simulation hangs.
 3. Ensure signals are driven using the appropriate mechanisms (`.value = ...`).
