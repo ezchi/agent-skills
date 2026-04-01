@@ -66,7 +66,7 @@ When executing a single simulation:
 
 1. Identify simulation binary location
 2. Create output/run directory
-3. Apply command-line arguments from `assets/templates/sim_args.txt`
+3. Apply any user-provided command-line arguments and reuse existing regression configuration when present
 4. Enable/disable waveform dumping per user request
 5. Capture stdout/stderr logs
 6. Grep for `TEST PASS` or `TEST FAIL`

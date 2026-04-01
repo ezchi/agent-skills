@@ -123,13 +123,12 @@ After the test plan is approved, generate the testbench:
 
 - Testbench style guide
 - Verilator compatibility checklist
-- Example testbenches under assets/examples
+- Example testbenches under `assets/templates/`
 
 ---
 
 ## Templates Provided
 
 - Basic testbench
-- Clock/reset drivers
 - Self-checking testbench
-- AXI-Lite bus master testbench
+- Example FIFO testbench

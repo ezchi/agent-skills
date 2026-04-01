@@ -1,12 +1,12 @@
-# CLAUDE.md
+# CODEX.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex CLI when working with code in this repository.
 
 ## Project Overview
 
 This repository is a collection of modular **Agent Skills** for Gemini CLI, Claude Code, and Codex CLI, targeting hardware engineers working with SystemVerilog, RTL design, and Verilator-based verification.
 
-Each skill lives in its own top-level directory and consists of a `SKILL.md` (persona + procedures), `assets/` (templates), `references/` (style guides/docs), `commands/` (source TOML slash commands that are converted per target), and optionally `scripts/`.
+Each skill lives in its own top-level directory and consists of a `SKILL.md` (persona + procedures), `assets/` (templates), `references/` (style guides/docs), `commands/` (source TOML slash command definitions), and optionally `scripts/`.
 
 ## Skills in This Repository
 
@@ -22,34 +22,47 @@ Each skill lives in its own top-level directory and consists of a `SKILL.md` (pe
 ## Installation Commands
 
 ```bash
-# Install all skills to Claude global (~/.claude/)
-./install.sh --claude --all
+# Install all skills to Codex global (~/.codex/) and generate a local plugin
+./install.sh --codex --all
 
-# Install to current project (.claude/)
-./install.sh --claude --project
+# Install to current project (.codex/) and generate a repo-local plugin
+./install.sh --codex --project
+
+# Install for Claude Code globally
+./install.sh --claude --all
 
 # Install for Gemini CLI globally
 ./install.sh --all
 
-# Install for Gemini CLI to project
-./install.sh --project
-
-# Install for Codex CLI globally
-./install.sh --codex --all
-
-# Install for Codex CLI to project
-./install.sh --codex --project
-
-# Package skills into .skill bundles (output: ./dist/)
+# Package Gemini .skill bundles into ./dist/
 ./pack_skills.sh
 ```
 
-After Gemini installation, run `/commands reload` in the Gemini CLI to activate slash commands.
+After Codex installation:
+
+1. Skills are copied into `.codex/skills/` or `~/.codex/skills/`.
+2. A local plugin is generated at `plugins/hardware-agent-skills/` or `~/plugins/hardware-agent-skills/`.
+3. The local Codex marketplace manifest is created or updated at `.agents/plugins/marketplace.json` or `~/.agents/plugins/marketplace.json`.
+4. In Codex CLI, run `/plugins` and install the local `hardware-agent-skills` plugin to enable the generated slash commands.
+
+## Codex Command Model
+
+Codex uses two separate surfaces in this repo:
+
+- **Skills**: copied directly to `.codex/skills/` and auto-discovered by Codex.
+- **Slash commands**: generated as Markdown files inside the local plugin `commands/` directory.
+
+The source of truth for slash commands remains the TOML files under each skill's `commands/` directory. During install:
+
+- Gemini receives TOML commands directly.
+- Claude receives generated Markdown commands via `toml_to_claude_cmd.sh`.
+- Codex receives generated plugin commands via `toml_to_codex_cmd.sh`.
 
 ## Adding a New Skill
 
 1. Create a `kebab-case` directory at the repo root with this structure:
-   ```
+
+   ```text
    <skill-name>/
    ├── SKILL.md        # Required: YAML frontmatter + persona + procedures
    ├── assets/         # Templates and boilerplate
@@ -59,6 +72,7 @@ After Gemini installation, run `/commands reload` in the Gemini CLI to activate 
    ```
 
 2. `SKILL.md` must begin with YAML frontmatter:
+
    ```yaml
    ---
    name: <skill-name>
@@ -71,27 +85,23 @@ After Gemini installation, run `/commands reload` in the Gemini CLI to activate 
    ---
    ```
 
-3. For Gemini slash commands, use relative paths with the `../skills/` prefix so `install.sh` can rewrite them correctly:
-   ```toml
-   prompt = """
-   Style Guide: @{../skills/<skill-name>/references/style-guide.md}
-   User input: {{args}}
-   """
-   ```
+3. Keep slash command source files in TOML under `commands/`.
 
-4. For slash commands, only `.toml` files are needed. `install.sh` calls `toml_to_claude_cmd.sh` to generate `.md` files for Claude and `toml_to_codex_cmd.sh` to generate Codex plugin commands at install time. You can also run the Claude converter directly:
+4. If a command references skill assets or references, use paths that the install pipeline can rewrite or convert correctly.
+
+5. Test all three install paths:
+
    ```bash
-   ./toml_to_claude_cmd.sh <input.toml> <output.md> <skills_dir>
+   ./install.sh --project --gemini --all
+   ./install.sh --project --claude --all
+   ./install.sh --project --codex --all
    ```
-   It extracts the `prompt` block, replaces `{{args}}` → `$ARGUMENTS`, strips `!{cat PATH}` inlining wrappers (leaving the bare path for Claude to read at runtime), and substitutes `__SKILLS_DIR__`.
-
-5. Update `GEMINI.md` with the new skill and any slash commands.
-
-6. Test installation: `./install.sh --project --claude` and `./install.sh --project --gemini`.
 
 ## Slash Commands
 
-After installation, Claude Code slash commands are available in `.claude/commands/` (project) or `~/.claude/commands/` (global).
+After install, Codex slash commands are provided by the generated local plugin, not by `.codex/commands/`.
+
+Current commands:
 
 | Command | Description |
 |---|---|
@@ -102,13 +112,11 @@ After installation, Claude Code slash commands are available in `.claude/command
 | `/sv-clean-code` | Review for Clean Code principles |
 | `/sv-verilator-check` | Check for Verilator compatibility issues |
 
-Commands are defined as `.md` files in each skill's `commands/` directory. The `__SKILLS_DIR__` placeholder is replaced with the absolute skills path at install time.
-
-## Engineering Standards (Applied to All Generated Code)
+## Engineering Standards
 
 All skills enforce the style guide at `systemverilog-core/references/style-guide.md`:
 
 - **Naming**: `snake_case` for modules/signals; `_t` for types; `_ct` for classes; `_if` for interfaces; `_pkg` for packages
-- **FSMs**: Mandatory two-block structure — `always_ff` for state register (`state_curr`), `always_comb` for next-state logic (`state_next`)
+- **FSMs**: Mandatory two-block structure with `always_ff` for `state_curr` and `always_comb` for `state_next`
 - **File discipline**: One module/class per file; file name matches entity name; every file starts with `` `default_nettype none ``
-- **Tool targets**: Verilator, Cocotb, synthesis tools
+- **Tool targets**: Verilator, Cocotb, and synthesis tools
