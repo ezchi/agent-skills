@@ -67,14 +67,21 @@ Use the remote URL to decide whether GitHub release creation is applicable:
 
 - If `origin` points to `github.com` or `git@github.com:...`, GitHub release creation may be used.
 - If the repo is not a GitHub repo, skip the `gh release` step entirely.
-- If GitHub CLI auth is unavailable or invalid, skip the `gh release` step and tell the user why.
+- Check `gh auth status` outside the sandbox or restricted shell context before any `gh release` action, because sandboxed auth may not reflect the user's real login session.
+- If GitHub CLI auth is unavailable or invalid in that non-sandboxed check, skip the `gh release` step and tell the user why.
 
 Create the GitHub release only when all of these are true:
 
 - the repo remote is GitHub
 - the tag already exists
 - the user asked to publish the GitHub release
-- `gh auth status` succeeds
+- non-sandboxed `gh auth status` succeeds
+
+When creating or editing release notes:
+
+- Do not embed markdown release notes directly in a shell-quoted `gh release create` or `gh release edit` command.
+- Write the release notes to a temporary file and use `--notes-file` to avoid shell quoting bugs.
+- Verify the published release body after creation when practical.
 
 ## Release Flow
 
@@ -92,6 +99,6 @@ Common direct release flow:
 8. Create an annotated tag such as `v0.4.0` on the release commit.
 9. If the repo workflow requires it, merge the release branch back into the development branch.
 10. Push branches and the new tag to `origin`.
-11. Only if the repo is on GitHub and `gh` is available and authenticated, create the GitHub Release from the existing tag.
+11. Only if the repo is on GitHub and `gh` is available and authenticated in a non-sandboxed check, create the GitHub Release from the existing tag using `--notes-file`.
 
 If the repo uses Git Flow or another explicit release-branch workflow, follow that instead of the direct flow.
