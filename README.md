@@ -1,4 +1,4 @@
-# Gemini CLI Agent Skills: Hardware Engineering
+# Hardware Engineering Agent Skills
 
 A collection of specialized [Gemini CLI](https://github.com/google/gemini-cli), [Claude Code](https://claude.ai), and Codex CLI agent skills designed for high-quality **SystemVerilog (SV)** development, RTL design, and **Verilator**-based verification.
 
@@ -24,8 +24,20 @@ These skills provide structured personas, expert workflows, and high-quality tem
 
 You can install these skills and their associated configurations to your global agent directory or directly to a specific project.
 
+### Install For All Supported Agents
+
+Use `--agent all` to install for Gemini CLI, Claude Code, and Codex CLI in one pass.
+
+```bash
+# Global installation (~/.gemini/, ~/.claude/, ~/.codex/, plus Codex plugin)
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --agent all --all
+
+# Project-specific installation (.gemini/, .claude/, .codex/, plus local Codex plugin)
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --project --agent all --all
+```
+
 ### Gemini CLI
-The default installation target is the Gemini CLI.
+Gemini is still the default single-agent installation target.
 
 ```bash
 # Global installation (~/.gemini/)
@@ -61,12 +73,13 @@ curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh 
 If you have already cloned the repository:
 
 ```bash
-./install.sh --all            # Gemini (default)
-./install.sh --claude --all   # Claude
-./install.sh --codex --all    # Codex
+./install.sh --agent all --all  # Gemini + Claude + Codex
+./install.sh --all              # Gemini only (default)
+./install.sh --claude --all     # Claude only
+./install.sh --codex --all      # Codex only
 ```
 
-*Notes: After installing for Gemini, run `/commands reload` in Gemini CLI to activate the new slash commands. After installing for Codex, run `/plugins` in Codex CLI and install the local `hardware-agent-skills` plugin.*
+*Notes: After installing for Gemini, run `/commands reload` in Gemini CLI to activate the new slash commands. After installing for Codex, run `/plugins` in Codex CLI and install the local `hardware-agent-skills` plugin. When using `--agent all`, both of those post-install steps still apply.*
 
 ## ⌨️ Slash Commands
 
