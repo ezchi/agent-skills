@@ -58,6 +58,7 @@ After the test plan is approved:
    - Set up the clock generator (`cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())`).
    - Write a reset routine.
    - Implement asynchronous driver and monitor tasks.
+   - **SystemVerilog structs:** When the DUT interface, transactions, or scoreboards use a SystemVerilog `struct`, always create a corresponding Python class to represent that struct. Do not pass raw dictionaries, tuples, or loosely packed integers around the testbench when a named struct type exists.
    - Create tests using `@cocotb.test()` with timeouts to prevent hangs.
    - **Prefer self-documenting code over comments** — use descriptive function/variable names and named constants. Only add comments to explain *why* (e.g., protocol timing, workarounds), never *what* the code does.
    - **Reproducible randomness:** When tests use `random`, rely on the `random_seed` fixture from `conftest.py`. This seeds `random` from `COCOTB_RANDOM_SEED` (if set) or `time.time_ns()` (so values differ each run) and logs the seed for reproduction. Never call `random.seed()` directly in tests.
@@ -76,6 +77,7 @@ After the test plan is approved:
 6. **Check for self-documenting code** — flag comments that explain *what* code does; ensure names and structure make intent obvious without comments.
 7. **Check randomness seeding** — flag any direct `random.seed()` calls. Tests must use the `random_seed` fixture so seeds vary per run and are logged for reproducibility.
 8. **Check build directory** — flag any hardcoded `sim_build` paths or in-source build directories. All runners must use the `build_dir` fixture to ensure out-of-source, per-test build isolation.
+9. **Check struct modeling** — when the RTL exposes a SystemVerilog `struct`, flag tests that model it as ad hoc dicts, tuples, or manual bit packing without a dedicated Python class.
 
 ## Generating `compile_commands.json` for Verilator C++ Code
 

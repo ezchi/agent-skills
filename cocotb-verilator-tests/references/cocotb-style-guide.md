@@ -50,6 +50,7 @@ def test_dut_runner(pytestconfig):
 - **Signal Driving:** Drive and sample data ONLY immediately after `RisingEdge(dut.clk)` (inside `delay_cc`). Avoid using falling edges (`FallingEdge`) unless explicitly requested.
 - **Clock Generators:** Use `cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())`.
 - **Initialization:** Use an explicit reset task. Ensure all control signals have known initial values before releasing reset.
+- **SystemVerilog structs:** Always model each RTL `struct` used by the testbench with a dedicated Python class. Do not represent structs as loose dicts, tuples, or anonymous packed integers in drivers, monitors, or scoreboards.
 
 ## Reproducible Randomness
 - **Every test file that uses randomness must seed `random` at the top of each test** using a seed derived from the environment or the current time.
