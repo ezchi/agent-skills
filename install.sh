@@ -10,6 +10,9 @@ AGENT="gemini"
 ALL_SKILLS=false
 TEMP_DIR=""
 CODEX_PLUGIN_NAME="hardware-agent-skills"
+AGENTS=""
+INSTALLED_PATHS=""
+CODEX_PLUGIN_PATH=""
 
 usage() {
     echo "Usage: $0 [options]"
@@ -17,7 +20,7 @@ usage() {
     echo "  --project    Install to current project (.gemini/, .claude/, or .codex/)"
     echo "  --global     Install to home directory (~/.gemini/, ~/.claude/, or ~/.codex/) [Default]"
     echo "  --all        Install all skills without prompting"
-    echo "  --agent NAME Agent to install for (gemini, claude, codex) [Default: gemini]"
+    echo "  --agent NAME Agent to install for (gemini, claude, codex, all) [Default: gemini]"
     echo "  --claude     Alias for --agent claude"
     echo "  --codex      Alias for --agent codex"
     echo "  --gemini     Alias for --agent gemini"
@@ -31,93 +34,65 @@ cleanup() {
     fi
 }
 
-trap cleanup EXIT
+set_agent_paths() {
+    local agent="$1"
 
-# Parse arguments
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --project) GLOBAL=false ;;
-        --global) GLOBAL=true ;;
-        --all) ALL_SKILLS=true ;;
-        --claude) AGENT="claude" ;;
-        --codex) AGENT="codex" ;;
-        --gemini) AGENT="gemini" ;;
-        --agent) AGENT="$2"; shift ;;
-        --help) usage; exit 0 ;;
-        *) echo "Unknown parameter: $1"; usage; exit 1 ;;
-    esac
-    shift
-done
-
-# Set installation path based on agent and scope
-if [ "$AGENT" = "claude" ]; then
-    BASE_DIR=".claude"
-elif [ "$AGENT" = "codex" ]; then
-    BASE_DIR=".codex"
-else
-    BASE_DIR=".gemini"
-fi
-
-if [ "$GLOBAL" = "true" ]; then
-    INSTALL_PATH="$HOME/$BASE_DIR"
-else
-    INSTALL_PATH="./$BASE_DIR"
-fi
-
-# Check if we are in the repo or need to clone it
-if [ ! -f "install.sh" ] || [ $(find . -maxdepth 2 -name "SKILL.md" | wc -l) -eq 0 ]; then
-    echo "Skills not found locally. Preparing remote installation..."
-    if ! command -v git >/dev/null 2>&1; then
-        echo "Error: git is required for remote installation."
-        exit 1
-    fi
-    TEMP_DIR=$(mktemp -d)
-    echo "Cloning repository to $TEMP_DIR..."
-    git clone --depth 1 "$REPO_URL" "$TEMP_DIR"
-    cd "$TEMP_DIR"
-fi
-
-mkdir -p "$INSTALL_PATH/skills"
-mkdir -p "$INSTALL_PATH/commands"
-
-if [ "$AGENT" = "codex" ]; then
-    if [ "$GLOBAL" = "true" ]; then
-        CODEX_PLUGIN_PARENT="$HOME/plugins"
-        CODEX_MARKETPLACE_PATH="$HOME/.agents/plugins/marketplace.json"
+    if [ "$agent" = "claude" ]; then
+        BASE_DIR=".claude"
+    elif [ "$agent" = "codex" ]; then
+        BASE_DIR=".codex"
     else
-        CODEX_PLUGIN_PARENT="./plugins"
-        CODEX_MARKETPLACE_PATH="./.agents/plugins/marketplace.json"
+        BASE_DIR=".gemini"
     fi
 
-    CODEX_PLUGIN_PATH="$CODEX_PLUGIN_PARENT/$CODEX_PLUGIN_NAME"
-    mkdir -p "$CODEX_PLUGIN_PATH/skills"
-    mkdir -p "$CODEX_PLUGIN_PATH/commands"
-    mkdir -p "$CODEX_PLUGIN_PATH/.codex-plugin"
-    mkdir -p "$(dirname "$CODEX_MARKETPLACE_PATH")"
-fi
+    if [ "$GLOBAL" = "true" ]; then
+        INSTALL_PATH="$HOME/$BASE_DIR"
+    else
+        INSTALL_PATH="./$BASE_DIR"
+    fi
 
-# Find available skills (directories with SKILL.md), including generic skills such as release-management
-SKILLS=$(find . -maxdepth 2 -name "SKILL.md" | xargs -n1 dirname | sed 's|^\./||' | sort | uniq)
-
-for skill in $SKILLS; do
-    # Skip the current directory if it somehow gets included
-    if [ "$skill" == "." ]; then continue; fi
-
-    if [ "$ALL_SKILLS" != "true" ]; then
-        printf "Install skill '%s' for %s? [Y/n] " "$skill" "$AGENT"
-        read -r confirm
-        if [[ $confirm =~ ^[Nn] ]]; then
-            continue
+    if [ "$agent" = "codex" ]; then
+        if [ "$GLOBAL" = "true" ]; then
+            CODEX_PLUGIN_PARENT="$HOME/plugins"
+            CODEX_MARKETPLACE_PATH="$HOME/.agents/plugins/marketplace.json"
+        else
+            CODEX_PLUGIN_PARENT="./plugins"
+            CODEX_MARKETPLACE_PATH="./.agents/plugins/marketplace.json"
         fi
-    fi
 
-    echo "Installing skill: $skill..."
-    
-    # Target directory for the skill
+        CODEX_PLUGIN_PATH="$CODEX_PLUGIN_PARENT/$CODEX_PLUGIN_NAME"
+    fi
+}
+
+prepare_agent_dirs() {
+    local agent="$1"
+
+    set_agent_paths "$agent"
+
+    mkdir -p "$INSTALL_PATH/skills"
+    mkdir -p "$INSTALL_PATH/commands"
+
+    if [ "$agent" = "codex" ]; then
+        mkdir -p "$CODEX_PLUGIN_PATH/skills"
+        mkdir -p "$CODEX_PLUGIN_PATH/commands"
+        mkdir -p "$CODEX_PLUGIN_PATH/.codex-plugin"
+        mkdir -p "$(dirname "$CODEX_MARKETPLACE_PATH")"
+    fi
+}
+
+install_skill_for_agent() {
+    local agent="$1"
+    local skill="$2"
+    local script_dir
+    local abs_skills_dir
+
+    set_agent_paths "$agent"
+
+    echo "Installing $skill for $agent..."
+
     SKILL_TARGET="$INSTALL_PATH/skills/$skill"
     mkdir -p "$SKILL_TARGET"
-    
-    # Copy skill files
+
     if command -v rsync >/dev/null 2>&1; then
         rsync -a --exclude='commands/' "$skill/" "$SKILL_TARGET/"
     else
@@ -125,7 +100,7 @@ for skill in $SKILLS; do
         rm -rf "$SKILL_TARGET/commands"
     fi
 
-    if [ "$AGENT" = "codex" ]; then
+    if [ "$agent" = "codex" ]; then
         CODEX_SKILL_TARGET="$CODEX_PLUGIN_PATH/skills/$skill"
         mkdir -p "$CODEX_SKILL_TARGET"
 
@@ -136,46 +111,41 @@ for skill in $SKILLS; do
             rm -rf "$CODEX_SKILL_TARGET/commands"
         fi
     fi
-    
-    # Copy commands if they exist
-    if [ -d "$skill/commands" ]; then
-        # Get absolute path to skills directory for path substitution
-        ABS_SKILLS_DIR=$(mkdir -p "$INSTALL_PATH/skills" && cd "$INSTALL_PATH/skills" && pwd)
 
-        if [ "$AGENT" = "gemini" ]; then
+    if [ -d "$skill/commands" ]; then
+        abs_skills_dir=$(mkdir -p "$INSTALL_PATH/skills" && cd "$INSTALL_PATH/skills" && pwd)
+        script_dir="$(cd "$(dirname "$0")" && pwd)"
+
+        if [ "$agent" = "gemini" ]; then
             echo "Installing Gemini commands for $skill..."
             for cmd_file in "$skill/commands"/*.toml; do
                 [ -e "$cmd_file" ] || continue
                 dest_file="$INSTALL_PATH/commands/$(basename "$cmd_file")"
-                # Replace __SKILLS_DIR__ placeholder with absolute path
-                sed "s|__SKILLS_DIR__|$ABS_SKILLS_DIR|g" "$cmd_file" > "$dest_file"
+                sed "s|__SKILLS_DIR__|$abs_skills_dir|g" "$cmd_file" > "$dest_file"
             done
-        elif [ "$AGENT" = "claude" ]; then
+        elif [ "$agent" = "claude" ]; then
             echo "Installing Claude commands for $skill..."
-            SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
             for cmd_file in "$skill/commands"/*.toml; do
                 [ -e "$cmd_file" ] || continue
                 base="$(basename "$cmd_file" .toml)"
                 dest_file="$INSTALL_PATH/commands/${base}.md"
-                "$SCRIPT_DIR/toml_to_claude_cmd.sh" "$cmd_file" "$dest_file" "$ABS_SKILLS_DIR"
+                "$script_dir/toml_to_claude_cmd.sh" "$cmd_file" "$dest_file" "$abs_skills_dir"
             done
-        elif [ "$AGENT" = "codex" ]; then
+        elif [ "$agent" = "codex" ]; then
             echo "Installing Codex commands for $skill..."
-            SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
             for cmd_file in "$skill/commands"/*.toml; do
                 [ -e "$cmd_file" ] || continue
                 base="$(basename "$cmd_file" .toml)"
                 dest_file="$CODEX_PLUGIN_PATH/commands/${base}.md"
-                "$SCRIPT_DIR/toml_to_codex_cmd.sh" "$cmd_file" "$dest_file" "$skill"
+                "$script_dir/toml_to_codex_cmd.sh" "$cmd_file" "$dest_file" "$skill"
             done
         fi
     fi
-    
-    echo "Successfully installed $skill"
-done
 
-if [ "$AGENT" = "codex" ]; then
+    echo "Successfully installed $skill for $agent"
+}
+
+write_codex_plugin() {
     cat > "$CODEX_PLUGIN_PATH/.codex-plugin/plugin.json" <<EOF
 {
   "name": "$CODEX_PLUGIN_NAME",
@@ -216,6 +186,7 @@ if [ "$AGENT" = "codex" ]; then
   }
 }
 EOF
+
     python3 - "$CODEX_MARKETPLACE_PATH" "$CODEX_PLUGIN_NAME" <<'PY'
 import json
 import os
@@ -260,19 +231,106 @@ with open(marketplace_path, "w", encoding="utf-8") as handle:
     json.dump(data, handle, indent=2)
     handle.write("\n")
 PY
+}
+
+trap cleanup EXIT
+
+# Parse arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --project) GLOBAL=false ;;
+        --global) GLOBAL=true ;;
+        --all) ALL_SKILLS=true ;;
+        --claude) AGENT="claude" ;;
+        --codex) AGENT="codex" ;;
+        --gemini) AGENT="gemini" ;;
+        --agent)
+            if [ -z "$2" ]; then
+                echo "Error: --agent requires a value."
+                usage
+                exit 1
+            fi
+            AGENT="$2"
+            shift
+            ;;
+        --help) usage; exit 0 ;;
+        *) echo "Unknown parameter: $1"; usage; exit 1 ;;
+    esac
+    shift
+done
+
+case "$AGENT" in
+    gemini|claude|codex) AGENTS="$AGENT" ;;
+    all) AGENTS="gemini claude codex" ;;
+    *)
+        echo "Error: unsupported agent '$AGENT'."
+        usage
+        exit 1
+        ;;
+esac
+
+# Check if we are in the repo or need to clone it
+if [ ! -f "install.sh" ] || [ "$(find . -maxdepth 2 -name "SKILL.md" | wc -l)" -eq 0 ]; then
+    echo "Skills not found locally. Preparing remote installation..."
+    if ! command -v git >/dev/null 2>&1; then
+        echo "Error: git is required for remote installation."
+        exit 1
+    fi
+    TEMP_DIR=$(mktemp -d)
+    echo "Cloning repository to $TEMP_DIR..."
+    git clone --depth 1 "$REPO_URL" "$TEMP_DIR"
+    cd "$TEMP_DIR"
 fi
+
+for agent in $AGENTS; do
+    prepare_agent_dirs "$agent"
+done
+
+# Find available skills (directories with SKILL.md), including generic skills such as release-management
+SKILLS=$(find . -maxdepth 2 -name "SKILL.md" | xargs -n1 dirname | sed 's|^\./||' | sort | uniq)
+
+for skill in $SKILLS; do
+    if [ "$skill" = "." ]; then
+        continue
+    fi
+
+    if [ "$ALL_SKILLS" != "true" ]; then
+        printf "Install skill '%s' for %s? [Y/n] " "$skill" "$AGENTS"
+        read -r confirm
+        if [[ $confirm =~ ^[Nn] ]]; then
+            continue
+        fi
+    fi
+
+    for agent in $AGENTS; do
+        install_skill_for_agent "$agent" "$skill"
+    done
+done
+
+for agent in $AGENTS; do
+    set_agent_paths "$agent"
+    full_install_path=$(mkdir -p "$INSTALL_PATH" && cd "$INSTALL_PATH" && pwd)
+    INSTALLED_PATHS="${INSTALLED_PATHS}${agent}:${full_install_path}
+"
+
+    if [ "$agent" = "codex" ]; then
+        write_codex_plugin
+    fi
+done
 
 echo ""
 echo "Installation complete!"
-FULL_INSTALL_PATH=$(mkdir -p "$INSTALL_PATH" && cd "$INSTALL_PATH" && pwd)
-echo "Skills and configurations installed for $AGENT to: $FULL_INSTALL_PATH"
+printf "%s" "$INSTALLED_PATHS" | while IFS=: read -r agent path; do
+    [ -n "$agent" ] || continue
+    echo "Skills and configurations installed for $agent to: $path"
 
-if [ "$AGENT" = "gemini" ]; then
-    echo "Run '/commands reload' in Gemini CLI to activate new slash commands."
-elif [ "$AGENT" = "claude" ]; then
-    echo "Slash commands installed to $FULL_INSTALL_PATH/commands/ — use /command-name in Claude Code."
-elif [ "$AGENT" = "codex" ]; then
-    echo "Skills installed to: $FULL_INSTALL_PATH/skills"
-    echo "Codex plugin written to: $(cd "$CODEX_PLUGIN_PATH" && pwd)"
-    echo "Open Codex CLI and run '/plugins' to install the local plugin '$CODEX_PLUGIN_NAME'."
-fi
+    if [ "$agent" = "gemini" ]; then
+        echo "Run '/commands reload' in Gemini CLI to activate new slash commands."
+    elif [ "$agent" = "claude" ]; then
+        echo "Slash commands installed to $path/commands/ - use /command-name in Claude Code."
+    elif [ "$agent" = "codex" ]; then
+        echo "Skills installed to: $path/skills"
+        echo "Codex plugin written to: $(cd "$CODEX_PLUGIN_PATH" && pwd)"
+        echo "Open Codex CLI and run '/plugins' to install the local plugin '$CODEX_PLUGIN_NAME'."
+    fi
+done
