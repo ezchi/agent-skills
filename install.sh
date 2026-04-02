@@ -96,7 +96,7 @@ if [ "$AGENT" = "codex" ]; then
     mkdir -p "$(dirname "$CODEX_MARKETPLACE_PATH")"
 fi
 
-# Find available skills (directories with SKILL.md)
+# Find available skills (directories with SKILL.md), including generic skills such as release-management
 SKILLS=$(find . -maxdepth 2 -name "SKILL.md" | xargs -n1 dirname | sed 's|^\./||' | sort | uniq)
 
 for skill in $SKILLS; do

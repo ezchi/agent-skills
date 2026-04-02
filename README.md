@@ -18,6 +18,7 @@ These skills provide structured personas, expert workflows, and high-quality tem
 - **`verilator`**: Expertise in Verilator-specific conversion, optimization, and C++ pitfalls.
 - **`verilator-cmake`**: Automation of CMake build systems for Verilator projects.
 - **`verilator-simflow`**: End-to-end simulation management, regressions, and waveform tracing.
+- **`release-management`**: Generic repository release planning, branch/tag confirmation, and optional GitHub release publishing.
 
 ## 📦 Installation
 
@@ -79,6 +80,7 @@ Once installed, use these commands to streamline your hardware development workf
 | `/sv-sva-check` | `core` | Review SystemVerilog Assertions (SVA) for best practices. |
 | `/sv-verilator-check` | `verilator` | Check for Verilator-specific compatibility issues. |
 | `/sv-clean-code` | `core` | Review code for Single Responsibility and clarity. |
+| `/repo-release` | `release-management` | Inspect and execute a repository release with interactive branch/tag confirmation. |
 
 Gemini uses native TOML commands, Claude receives generated Markdown commands, and Codex receives generated plugin commands.
 
