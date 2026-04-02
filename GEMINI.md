@@ -1,6 +1,6 @@
 # Gemini CLI Agent Skills: SystemVerilog & Verilator
 
-This repository contains a suite of specialized **Agent Skills** for the Gemini CLI and Claude Code. These skills provide the personas, procedures, templates, and style guides necessary for high-quality SystemVerilog development, RTL design, and Verilator-based verification workflows.
+This repository contains a suite of specialized **Agent Skills** for Gemini CLI, Claude Code, and Codex CLI. These skills provide the personas, procedures, templates, and style guides necessary for high-quality SystemVerilog development, RTL design, and Verilator-based verification workflows.
 
 ## Project Overview
 
@@ -57,6 +57,16 @@ curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --claude --project
 ```
 
+### Codex CLI
+
+```bash
+# Install all skills globally (~/.codex/) and generate a local Codex plugin
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --codex --all
+
+# Install to current project (.codex/) and generate a repo-local Codex plugin
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --codex --project
+```
+
 ### Local Installation
 
 The script will:
@@ -64,6 +74,8 @@ The script will:
 2.  Optionally prompt you for each skill.
 3.  Copy the skill files (`SKILL.md`, `assets/`, `references/`) to the target `skills/` directory.
 4.  For Gemini, register custom slash commands by copying TOML files to the target `commands/` directory.
+5.  For Claude, generate Markdown slash commands in the target `commands/` directory.
+6.  For Codex, generate a local plugin with Markdown commands and add it to the local marketplace manifest.
 
 ## Slash Commands (Gemini CLI Only)
 

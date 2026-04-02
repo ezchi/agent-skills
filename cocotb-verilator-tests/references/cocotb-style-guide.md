@@ -10,6 +10,39 @@
 - **Pytest Runner:** Prefer `cocotb_tools.runner` via a Python script (e.g., `runner.py` or `conftest.py`) over a legacy `Makefile`.
 - **Command Line:** Run simulations with `pytest -s runner.py` or just `pytest`.
 
+## Build Directories
+- **Out-of-source builds:** Build artifacts must go under `<repo_root>/build/cocotb/<test_dir_name>/`, never inside the source tree. This keeps the repo clean and avoids `sim_build/` clutter.
+- **Per-test isolation:** Each test directory gets its own build directory so tests can run in parallel (`pytest -n auto`) without conflicting. Use the `build_dir` fixture from `conftest.py`.
+- **Never hardcode `sim_build`** as a build path. Always use the `build_dir` fixture.
+
+Good:
+```python
+def test_dut_runner(pytestconfig, build_dir):
+    runner = get_runner("verilator")
+    runner.build(
+        sources=[rtl_dir / "dut.sv"],
+        hdl_toplevel="dut",
+        build_dir=build_dir,  # out-of-source, per-test
+        ...
+    )
+    runner.test(
+        hdl_toplevel="dut",
+        test_module="test_dut",
+        build_dir=build_dir,
+        ...
+    )
+```
+
+Poor:
+```python
+def test_dut_runner(pytestconfig):
+    runner = get_runner("verilator")
+    runner.build(
+        build_dir=curr_dir / "sim_build",  # pollutes source tree, blocks parallel runs
+        ...
+    )
+```
+
 ## Best Practices
 - **Timeouts:** All tests must have a `timeout_time` specified in the `@cocotb.test()` decorator to prevent simulation hangs.
 - **Waveform Clarity:** Run at least 2 extra clock cycles using `await delay_cc(dut, 2)` before the test completes.

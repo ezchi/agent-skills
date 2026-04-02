@@ -1,5 +1,7 @@
 description = "Check RTL for synthesis risks"
 prompt = """
+Assume the code is wrong. Your job is to find where.
+
 Check the RTL in {{args}} for synthesis risks.
 Reference: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 
@@ -8,4 +10,7 @@ Check for:
 - Inferred latches
 - Reset completeness
 - Combinational loops
+
+Do not confirm correctness. Only report violations with file, line, and what is wrong.
+If you find nothing, say so in one line — do not pad with praise.
 """

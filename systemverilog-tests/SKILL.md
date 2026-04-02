@@ -54,9 +54,31 @@ Activate this skill when prompts mention:
 
 ---
 
+## Test Plan Procedure (Mandatory — Before Any Implementation)
+
+Before writing any testbench code, create and present a test plan for user approval:
+
+1. **Parse DUT interface and parameters** — identify clocks, resets, I/O ports, parameters, and operating modes.
+2. **Identify major features to test** — list each functional block, operating mode, protocol, and boundary condition the DUT exposes.
+3. **Define coverage points** — for each feature, specify what must be exercised: input ranges, edge cases, state transitions, error injection, corner cases, and cross-coverage between features.
+4. **Build the test list** — a table with columns:
+
+   | Test Name | Purpose | How to Test |
+   |-----------|---------|-------------|
+   | `test_reset_behavior` | Verify outputs go to known state on reset | Assert all outputs match reset values after reset assertion/deassertion |
+   | … | … | … |
+
+   - **Test Name**: descriptive `snake_case` name prefixed with `test_`.
+   - **Purpose**: one sentence stating what the test proves.
+   - **How to Test**: concrete stimulus and checking strategy (directed values, random sweep, assertion type, scoreboard comparison, etc.).
+
+5. **Present the plan to the user and wait for approval** before writing any testbench code.
+
+---
+
 ## Testbench Generation Procedure
 
-When generating a testbench:
+After the test plan is approved, generate the testbench:
 
 1. Parse DUT interface and parameters
 2. **Search existing testbenches and `verif/vip/`** for reusable drivers, monitors, scoreboards, and helper tasks. Import and reuse them instead of writing from scratch.
@@ -80,7 +102,8 @@ When generating a testbench:
 
 ## Testbench Review Procedure
 
-1. Check naming conventions from `test-style-guide.md`
+1. **Verify a test plan exists** — check that tests correspond to a documented plan with features, coverage points, and test list. Flag any tests that appear ad-hoc or lack traceability to a plan.
+2. Check naming conventions from `test-style-guide.md`
 2. **Check for code reuse** — flag duplicated drivers, monitors, or helper tasks that already exist in `verif/vip/` or other testbenches. Recommend extracting shared logic into reusable components.
 3. **Check for self-documenting code** — flag comments that explain *what* code does (rename or restructure instead); keep only *why* comments.
 4. **Verify a watchdog/timeout is present to prevent infinite simulation hangs.**
@@ -100,13 +123,12 @@ When generating a testbench:
 
 - Testbench style guide
 - Verilator compatibility checklist
-- Example testbenches under assets/examples
+- Example testbenches under `assets/templates/`
 
 ---
 
 ## Templates Provided
 
 - Basic testbench
-- Clock/reset drivers
 - Self-checking testbench
-- AXI-Lite bus master testbench
+- Example FIFO testbench

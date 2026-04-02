@@ -1,6 +1,6 @@
 # Gemini CLI Agent Skills: Hardware Engineering
 
-A collection of specialized [Gemini CLI](https://github.com/google/gemini-cli) and [Claude Code](https://claude.ai) Agent Skills designed for high-quality **SystemVerilog (SV)** development, RTL design, and **Verilator**-based verification.
+A collection of specialized [Gemini CLI](https://github.com/google/gemini-cli), [Claude Code](https://claude.ai), and Codex CLI agent skills designed for high-quality **SystemVerilog (SV)** development, RTL design, and **Verilator**-based verification.
 
 ## 🚀 Overview
 
@@ -9,6 +9,7 @@ These skills provide structured personas, expert workflows, and high-quality tem
 ### Supported Agents
 - **Gemini CLI**: Full support for skills and custom slash commands.
 - **Claude Code**: Support for skills and custom instructions.
+- **Codex CLI**: Support for skills plus a local plugin wrapper for slash commands.
 
 ### Included Skills
 - **`systemverilog-core`**: RTL design following "Clean Code" principles and a strict style guide.
@@ -17,6 +18,7 @@ These skills provide structured personas, expert workflows, and high-quality tem
 - **`verilator`**: Expertise in Verilator-specific conversion, optimization, and C++ pitfalls.
 - **`verilator-cmake`**: Automation of CMake build systems for Verilator projects.
 - **`verilator-simflow`**: End-to-end simulation management, regressions, and waveform tracing.
+- **`release-management`**: Generic repository release planning, branch/tag confirmation, and optional GitHub release publishing.
 
 ## 📦 Installation
 
@@ -44,15 +46,27 @@ curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --claude --project
 ```
 
+### Codex CLI
+Use the `--codex` flag to install skills to Codex and generate a local plugin for slash commands.
+
+```bash
+# Global installation (~/.codex/skills + ~/plugins/hardware-agent-skills)
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --codex --all
+
+# Project-specific installation (.codex/skills + ./plugins/hardware-agent-skills)
+curl -fsSL https://raw.githubusercontent.com/ezchi/agent-skills/main/install.sh | bash -s -- --codex --project
+```
+
 ### Local Installation
 If you have already cloned the repository:
 
 ```bash
 ./install.sh --all            # Gemini (default)
 ./install.sh --claude --all   # Claude
+./install.sh --codex --all    # Codex
 ```
 
-*Note: After installing for Gemini, run `/commands reload` in the Gemini CLI to activate the new slash commands.*
+*Notes: After installing for Gemini, run `/commands reload` in Gemini CLI to activate the new slash commands. After installing for Codex, run `/plugins` in Codex CLI and install the local `hardware-agent-skills` plugin.*
 
 ## ⌨️ Slash Commands
 
@@ -66,6 +80,9 @@ Once installed, use these commands to streamline your hardware development workf
 | `/sv-sva-check` | `core` | Review SystemVerilog Assertions (SVA) for best practices. |
 | `/sv-verilator-check` | `verilator` | Check for Verilator-specific compatibility issues. |
 | `/sv-clean-code` | `core` | Review code for Single Responsibility and clarity. |
+| `/repo-release` | `release-management` | Inspect and execute a repository release with interactive branch/tag confirmation. |
+
+Gemini uses native TOML commands, Claude receives generated Markdown commands, and Codex receives generated plugin commands.
 
 ## 🛠️ Contributing
 
