@@ -33,7 +33,7 @@ end
 always_comb begin
     state_next = S_XXX; // Pre-default 'x assignment
 
-    case (state_curr)
+    unique case (state_curr)
         S_IDLE: begin
             if (i_in1) state_next = S_STATE_1;
             else       state_next = S_IDLE;
@@ -57,7 +57,7 @@ always_comb begin
     out1_c = '0;
     out2_c = '0;
 
-    case (state_curr)
+    unique case (state_curr)
         S_IDLE: begin
             if (i_in1) out1_c = '1;
         end

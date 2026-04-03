@@ -10,6 +10,7 @@ Check:
 - Naming conventions (signals, modules, instances, ports)
 - Clock & Reset naming (clk, rst, reset, or i_clk, i_rst, i_reset for ports)
 - FSM state naming (state_curr/next)
+- All case statements must use `unique case` — flag bare `case` and `priority case`
 - _t suffix for types
 - Width consistency
 

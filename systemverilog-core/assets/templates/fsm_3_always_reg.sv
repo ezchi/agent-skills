@@ -30,7 +30,7 @@ end
 always_comb begin
     state_next = S_XXX; // Pre-default 'x assignment
 
-    case (state_curr)
+    unique case (state_curr)
         S_IDLE: begin
             if (i_in1) state_next = S_STATE_1;
             else       state_next = S_IDLE;
@@ -62,7 +62,7 @@ always_ff @(posedge i_clk) begin
         o_out2 <= '0;
 
         // Re-implementing specific Example 16 logic for correctness with the paper's style:
-        case (state_next)
+        unique case (state_next)
             S_IDLE:    begin
                 if (state_curr == S_STATE_2 && !i_in2) o_out2 <= '1;
             end

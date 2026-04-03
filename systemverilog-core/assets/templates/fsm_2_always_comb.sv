@@ -32,7 +32,7 @@ always_comb begin
     o_out1 = '0;    // Default output assignments
     o_out2 = '0;
 
-    case (state_curr)
+    unique case (state_curr)
         S_IDLE: begin
             if (i_in1) state_next = S_STATE_1;
             else       state_next = S_IDLE; // Loopback

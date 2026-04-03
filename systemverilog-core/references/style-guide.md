@@ -427,7 +427,7 @@ end
 #### Rules
 
 * Default assignment to `state_next` is mandatory
-* `unique case` or `priority case` required
+* `unique case` required — `priority case` and bare `case` are not allowed
 * All enum values must be covered
 * No combinational outputs driven directly from `state_curr`
 
