@@ -4,7 +4,7 @@
 - Testbench files should be named `test_<module_name>.py`.
 - Tests should be decorated with `@cocotb.test()` and named descriptively (e.g., `async def test_fifo_overflow(dut):`).
 - Clocks should be generated using `cocotb.clock.Clock`.
-- Avoid using delays like `Timer(10, "ns")` for synchronization in synchronous logic. Instead, always synchronize to the clock edge using `await RisingEdge(dut.clk)`.
+- **No `Timer()` for signal synchronization.** Never use `Timer(N, "ns")` to advance time in synchronous designs — it decouples the testbench from the clock and creates race conditions. Always synchronize to the clock edge via `await RisingEdge(dut.clk)` (or `delay_cc`).
 
 ## Project Structure & Runners
 - **Pytest Runner:** Prefer `cocotb_tools.runner` via a Python script (e.g., `runner.py` or `conftest.py`) over a legacy `Makefile`.
@@ -47,9 +47,29 @@ def test_dut_runner(pytestconfig):
 - **Timeouts:** All tests must have a `timeout_time` specified in the `@cocotb.test()` decorator to prevent simulation hangs.
 - **Waveform Clarity:** Run at least 2 extra clock cycles using `await delay_cc(dut, 2)` before the test completes.
 - **Clock Delays:** ALWAYS use a `delay_cc(dut, n)` helper function; DO NOT use `await RisingEdge(dut.clk)` or loops of them directly in the test logic.
-- **Signal Driving:** Drive and sample data ONLY immediately after `RisingEdge(dut.clk)` (inside `delay_cc`). Avoid using falling edges (`FallingEdge`) unless explicitly requested.
+- **Signal Driving:** Drive and sample data ONLY immediately after `RisingEdge(dut.clk)` (inside `delay_cc`). **`FallingEdge` is banned** for driving or sampling — it creates setup/hold races with `posedge`-clocked RTL.
 - **Clock Generators:** Use `cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())`.
 - **Initialization:** Use an explicit reset task. Ensure all control signals have known initial values before releasing reset.
+- **SystemVerilog structs:** Always model each RTL `struct` used by the testbench with a dedicated Python class. Do not represent structs as loose dicts, tuples, or anonymous packed integers in drivers, monitors, or scoreboards.
+
+### Race Condition Awareness (Cocotb Scheduling)
+
+Cocotb uses trigger phases that map to the IEEE 1800 scheduling regions.
+Understanding them prevents read/write races:
+
+* **Drive after `RisingEdge`.**  `await RisingEdge(dut.clk)` resumes in the
+  Active region.  Driving signals here is correct — the values propagate through
+  combinational logic before the next clock edge.
+* **Sample in `ReadOnly` if needed.**  If you must sample a signal that is being
+  driven in the same timestep by other coroutines, use
+  `await cocotb.triggers.ReadOnly()` to wait until the Postponed region where all
+  values are settled.  Prefer this over inserting zero-time delays.
+* **Never use `ReadWrite` for normal driving.**  `ReadWrite` re-enters the Active
+  region and can re-trigger delta cycles.  It is almost never needed in
+  well-structured tests.
+* **No `Timer(0)`.**  `Timer(0, "ns")` is the cocotb equivalent of `#0` — it
+  advances by a delta cycle and creates the same scheduling races.  Use
+  `RisingEdge` or `ReadOnly` instead.
 
 ## Reproducible Randomness
 - **Every test file that uses randomness must seed `random` at the top of each test** using a seed derived from the environment or the current time.

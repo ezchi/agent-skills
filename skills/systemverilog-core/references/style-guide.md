@@ -427,7 +427,7 @@ end
 #### Rules
 
 * Default assignment to `state_next` is mandatory
-* `unique case` or `priority case` required
+* `unique case` required — `priority case` and bare `case` are not allowed
 * All enum values must be covered
 * No combinational outputs driven directly from `state_curr`
 
@@ -456,13 +456,60 @@ endmodule
 
 ### Avoid Gotchas
 
-| Gotcha            | Rule                         |
-|-------------------|------------------------------|
-| Blocking in seq   | Use `<=` only                |
-| Mixed comb/seq    | One block, one role          |
-| X-optimism        | Explicit resets, assertions  |
-| Width mismatch    | Explicit casts               |
-| `logic` vs `wire` | Use `logic` unless tri-state |
+| Gotcha                   | Rule                                                         |
+|--------------------------|--------------------------------------------------------------|
+| Blocking in seq          | `always_ff` uses only `<=` (NBA); never `=`                  |
+| Blocking in comb         | `always_comb` uses only `=`; never `<=`                      |
+| Mixed comb/seq           | One block, one role                                          |
+| `+=`/`++`/`--` in seq   | No NBA form exists — expand manually: `x <= x + 1`          |
+| Manual sensitivity list  | Use `always_comb` / `always_ff`; never `always @(…)`         |
+| Multi-driver signal      | One driver per signal; no multi-driver patterns              |
+| Mixed assign + proc      | Never `assign` and procedural on the same signal             |
+| NBA in functions         | Functions use `=` only — NBA on return / output args is wrong |
+| X-optimism               | Explicit resets, assertions                                  |
+| Width mismatch           | Explicit casts                                               |
+| `logic` vs `wire`        | Use `logic` unless tri-state                                 |
+| `force`/`release`        | Never in synthesizable RTL                                   |
+
+#### Race-Condition Rules (RTL)
+
+These rules derive from the IEEE 1800 scheduling semantics exploited by the
+Mentor/Siemens SystemVerilog race-condition challenge (Dave Rich & Neil Johnson).
+
+1. **`always_ff` — NBA only.**  Every assignment inside `always_ff` must use `<=`.
+   The simulator schedules NBA updates in the NBA region, after all Active-region
+   `=` assignments, which is the only way to guarantee race-free sequential logic.
+
+2. **`always_comb` — blocking only.**  Every assignment inside `always_comb` must
+   use `=`.  NBA in combinational blocks delays the update and creates a
+   simulation/synthesis mismatch.
+
+3. **No shorthand modify-assigns in clocked blocks.**  `+=`, `-=`, `++`, `--`
+   have no NBA form.  In an `always_ff` block, write the expansion explicitly:
+   ```systemverilog
+   // Good
+   always_ff @(posedge clk) begin
+     count <= count + 1;
+   end
+
+   // Bad — synthesizes blocking, creates race
+   always_ff @(posedge clk) begin
+     count++;
+   end
+   ```
+
+4. **No manual sensitivity lists.**  Use `always_comb` or `always_ff @(posedge clk)`.
+   Never write `always @(a or b)` or `always @(*)` — the former is error-prone,
+   the latter is the legacy equivalent of `always_comb` but lacks its compile-time
+   checks.
+
+5. **One driver per signal.**  A signal may be driven by exactly one continuous
+   `assign`, one `always_comb`, or one `always_ff` block — never more than one,
+   and never a mix of continuous and procedural.
+
+6. **NBA in function returns is illegal.**  Functions execute in zero simulation
+   time and must use `=` for return values and `output` arguments.  An NBA inside
+   a function silently defers the update, producing wrong results.
 
 ---
 
@@ -675,7 +722,7 @@ a_valid_eventually_ready: assert property (p_valid_eventually_ready);
 ### RTL Rules for Cocotb
 
 * Ports must be **2-state clean** when possible.
-* Avoid force/release semantics.
+* **No `force`/`release`** — not supported by Verilator; creates multi-driver races in simulation.
 * Use simple packed arrays instead of unpacked for ports.
 
 ### Naming for Python Access

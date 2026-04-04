@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository is a collection of modular **Agent Skills** for Gemini CLI, Claude Code, and Codex CLI, targeting hardware engineers working with SystemVerilog, RTL design, and Verilator-based verification.
 
-Each skill lives in its own top-level directory and consists of a `SKILL.md` (persona + procedures), `assets/` (templates), `references/` (style guides/docs), `commands/` (source TOML slash commands that are converted per target), and optionally `scripts/`.
+Each skill lives in its own directory under `skills/` and consists of a `SKILL.md` (persona + procedures), `assets/` (templates), `references/` (style guides/docs), `commands/` (source TOML slash commands that are converted per target), and optionally `scripts/`. Helper scripts live in the top-level `scripts/` directory.
 
 ## Skills in This Repository
 
@@ -41,16 +41,16 @@ Each skill lives in its own top-level directory and consists of a `SKILL.md` (pe
 ./install.sh --codex --project
 
 # Package skills into .skill bundles (output: ./dist/)
-./pack_skills.sh
+./scripts/pack_skills.sh
 ```
 
 After Gemini installation, run `/commands reload` in the Gemini CLI to activate slash commands.
 
 ## Adding a New Skill
 
-1. Create a `kebab-case` directory at the repo root with this structure:
+1. Create a `kebab-case` directory under `skills/` with this structure:
    ```
-   <skill-name>/
+   skills/<skill-name>/
    ├── SKILL.md        # Required: YAML frontmatter + persona + procedures
    ├── assets/         # Templates and boilerplate
    ├── references/     # Style guides and documentation
@@ -79,9 +79,9 @@ After Gemini installation, run `/commands reload` in the Gemini CLI to activate 
    """
    ```
 
-4. For slash commands, only `.toml` files are needed. `install.sh` calls `toml_to_claude_cmd.sh` to generate `.md` files for Claude and `toml_to_codex_cmd.sh` to generate Codex plugin commands at install time. You can also run the Claude converter directly:
+4. For slash commands, only `.toml` files are needed. `install.sh` calls `scripts/toml_to_claude_cmd.sh` to generate `.md` files for Claude and `scripts/toml_to_codex_cmd.sh` to generate Codex plugin commands at install time. You can also run the Claude converter directly:
    ```bash
-   ./toml_to_claude_cmd.sh <input.toml> <output.md> <skills_dir>
+   ./scripts/toml_to_claude_cmd.sh <input.toml> <output.md> <skills_dir>
    ```
    It extracts the `prompt` block, replaces `{{args}}` → `$ARGUMENTS`, strips `!{cat PATH}` inlining wrappers (leaving the bare path for Claude to read at runtime), and substitutes `__SKILLS_DIR__`.
 
@@ -106,7 +106,7 @@ Commands are defined as `.md` files in each skill's `commands/` directory. The `
 
 ## Engineering Standards (Applied to All Generated Code)
 
-All skills enforce the style guide at `systemverilog-core/references/style-guide.md`:
+All skills enforce the style guide at `skills/systemverilog-core/references/style-guide.md`:
 
 - **Naming**: `snake_case` for modules/signals; `_t` for types; `_ct` for classes; `_if` for interfaces; `_pkg` for packages
 - **FSMs**: Mandatory two-block structure — `always_ff` for state register (`state_curr`), `always_comb` for next-state logic (`state_next`)
