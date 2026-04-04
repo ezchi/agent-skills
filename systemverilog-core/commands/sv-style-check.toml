@@ -13,6 +13,14 @@ Check:
 - All case statements must use `unique case` — flag bare `case` and `priority case`
 - _t suffix for types
 - Width consistency
+- Race-condition patterns:
+  - `always_ff` block containing `=` (blocking assign) — must use `<=` only
+  - `always_comb` block containing `<=` (NBA) — must use `=` only
+  - `+=`, `-=`, `++`, `--` inside `always_ff` — no NBA form, must expand manually
+  - Mixed blocking and NBA (`=` and `<=`) in the same `always` block
+  - Manual sensitivity list (`always @(...)`) instead of `always_comb`/`always_ff`
+  - NBA (`<=`) used for function return value or output argument assignment
+  - Same signal driven by both `assign` and a procedural block
 
 Do not confirm correctness. Only report violations with file, line, and what is wrong.
 If you find nothing, say so in one line — do not pad with praise.
