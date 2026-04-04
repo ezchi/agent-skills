@@ -6,7 +6,7 @@ This file provides guidance to Codex CLI when working with code in this reposito
 
 This repository is a collection of modular **Agent Skills** for Gemini CLI, Claude Code, and Codex CLI, targeting hardware engineers working with SystemVerilog, RTL design, and Verilator-based verification.
 
-Each skill lives in its own top-level directory and consists of a `SKILL.md` (persona + procedures), `assets/` (templates), `references/` (style guides/docs), `commands/` (source TOML slash command definitions), and optionally `scripts/`.
+Each skill lives in its own directory under `skills/` and consists of a `SKILL.md` (persona + procedures), `assets/` (templates), `references/` (style guides/docs), `commands/` (source TOML slash command definitions), and optionally `scripts/`. Helper scripts live in the top-level `scripts/` directory.
 
 ## Skills in This Repository
 
@@ -35,7 +35,7 @@ Each skill lives in its own top-level directory and consists of a `SKILL.md` (pe
 ./install.sh --all
 
 # Package Gemini .skill bundles into ./dist/
-./pack_skills.sh
+./scripts/pack_skills.sh
 ```
 
 After Codex installation:
@@ -55,15 +55,15 @@ Codex uses two separate surfaces in this repo:
 The source of truth for slash commands remains the TOML files under each skill's `commands/` directory. During install:
 
 - Gemini receives TOML commands directly.
-- Claude receives generated Markdown commands via `toml_to_claude_cmd.sh`.
-- Codex receives generated plugin commands via `toml_to_codex_cmd.sh`.
+- Claude receives generated Markdown commands via `scripts/toml_to_claude_cmd.sh`.
+- Codex receives generated plugin commands via `scripts/toml_to_codex_cmd.sh`.
 
 ## Adding a New Skill
 
-1. Create a `kebab-case` directory at the repo root with this structure:
+1. Create a `kebab-case` directory under `skills/` with this structure:
 
    ```text
-   <skill-name>/
+   skills/<skill-name>/
    ├── SKILL.md        # Required: YAML frontmatter + persona + procedures
    ├── assets/         # Templates and boilerplate
    ├── references/     # Style guides and documentation
@@ -114,7 +114,7 @@ Current commands:
 
 ## Engineering Standards
 
-All skills enforce the style guide at `systemverilog-core/references/style-guide.md`:
+All skills enforce the style guide at `skills/systemverilog-core/references/style-guide.md`:
 
 - **Naming**: `snake_case` for modules/signals; `_t` for types; `_ct` for classes; `_if` for interfaces; `_pkg` for packages
 - **FSMs**: Mandatory two-block structure with `always_ff` for `state_curr` and `always_comb` for `state_next`

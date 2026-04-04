@@ -17,10 +17,10 @@ The Gemini CLI includes a built-in **`skill-creator`** skill that can bootstrap 
 
 ## 2. Manual Directory Structure
 
-Each skill must reside in its own top-level directory. The name of the directory should match the skill name (use `kebab-case`).
+Each skill must reside in its own directory under `skills/`. The name of the directory should match the skill name (use `kebab-case`).
 
 ```text
-<skill-name>/
+skills/<skill-name>/
 ├── SKILL.md             # Mandatory: The main persona and procedures
 ├── assets/              # Optional: Templates, snippets, or boilerplate
 ├── references/          # Optional: Style guides, logic rules, or documentation

@@ -101,7 +101,7 @@ Gemini uses native TOML commands, Claude receives generated Markdown commands, a
 
 We welcome new skills! Please refer to the **[CONTRIBUTING_SKILLS.md](./CONTRIBUTING_SKILLS.md)** guide for instructions on:
 - Using the built-in `skill-creator` to bootstrap new skills.
-- Packaging skills with **`./pack_skills.sh`**.
+- Packaging skills with **`./scripts/pack_skills.sh`**.
 - Defining custom slash commands.
 - Ensuring path portability for the installation script.
 

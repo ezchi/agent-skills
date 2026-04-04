@@ -15,7 +15,7 @@ The project is structured as a collection of modular skills, each focusing on a 
 
 ## Engineering Standards
 
-All skills and generated code must adhere to the **SystemVerilog Style Guide** (`systemverilog-core/references/style-guide.md`). Key mandates include:
+All skills and generated code must adhere to the **SystemVerilog Style Guide** (`skills/systemverilog-core/references/style-guide.md`). Key mandates include:
 
 *   **Clarity over Cleverness**: Prioritize explicit logic and readable naming over compact or obscure constructs.
 *   **Naming Conventions**:

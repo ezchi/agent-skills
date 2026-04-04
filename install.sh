@@ -13,6 +13,7 @@ CODEX_PLUGIN_NAME="hardware-agent-skills"
 AGENTS=""
 INSTALLED_PATHS=""
 CODEX_PLUGIN_PATH=""
+SKILLS_SRC_DIR="skills"
 
 usage() {
     echo "Usage: $0 [options]"
@@ -94,9 +95,9 @@ install_skill_for_agent() {
     mkdir -p "$SKILL_TARGET"
 
     if command -v rsync >/dev/null 2>&1; then
-        rsync -a --exclude='commands/' "$skill/" "$SKILL_TARGET/"
+        rsync -a --exclude='commands/' "$SKILLS_SRC_DIR/$skill/" "$SKILL_TARGET/"
     else
-        cp -r "$skill"/* "$SKILL_TARGET/"
+        cp -r "$SKILLS_SRC_DIR/$skill"/* "$SKILL_TARGET/"
         rm -rf "$SKILL_TARGET/commands"
     fi
 
@@ -105,39 +106,39 @@ install_skill_for_agent() {
         mkdir -p "$CODEX_SKILL_TARGET"
 
         if command -v rsync >/dev/null 2>&1; then
-            rsync -a --exclude='commands/' "$skill/" "$CODEX_SKILL_TARGET/"
+            rsync -a --exclude='commands/' "$SKILLS_SRC_DIR/$skill/" "$CODEX_SKILL_TARGET/"
         else
-            cp -r "$skill"/* "$CODEX_SKILL_TARGET/"
+            cp -r "$SKILLS_SRC_DIR/$skill"/* "$CODEX_SKILL_TARGET/"
             rm -rf "$CODEX_SKILL_TARGET/commands"
         fi
     fi
 
-    if [ -d "$skill/commands" ]; then
+    if [ -d "$SKILLS_SRC_DIR/$skill/commands" ]; then
         abs_skills_dir=$(mkdir -p "$INSTALL_PATH/skills" && cd "$INSTALL_PATH/skills" && pwd)
         script_dir="$(cd "$(dirname "$0")" && pwd)"
 
         if [ "$agent" = "gemini" ]; then
             echo "Installing Gemini commands for $skill..."
-            for cmd_file in "$skill/commands"/*.toml; do
+            for cmd_file in "$SKILLS_SRC_DIR/$skill/commands"/*.toml; do
                 [ -e "$cmd_file" ] || continue
                 dest_file="$INSTALL_PATH/commands/$(basename "$cmd_file")"
                 sed "s|__SKILLS_DIR__|$abs_skills_dir|g" "$cmd_file" > "$dest_file"
             done
         elif [ "$agent" = "claude" ]; then
             echo "Installing Claude commands for $skill..."
-            for cmd_file in "$skill/commands"/*.toml; do
+            for cmd_file in "$SKILLS_SRC_DIR/$skill/commands"/*.toml; do
                 [ -e "$cmd_file" ] || continue
                 base="$(basename "$cmd_file" .toml)"
                 dest_file="$INSTALL_PATH/commands/${base}.md"
-                "$script_dir/toml_to_claude_cmd.sh" "$cmd_file" "$dest_file" "$abs_skills_dir"
+                "$script_dir/scripts/toml_to_claude_cmd.sh" "$cmd_file" "$dest_file" "$abs_skills_dir"
             done
         elif [ "$agent" = "codex" ]; then
             echo "Installing Codex commands for $skill..."
-            for cmd_file in "$skill/commands"/*.toml; do
+            for cmd_file in "$SKILLS_SRC_DIR/$skill/commands"/*.toml; do
                 [ -e "$cmd_file" ] || continue
                 base="$(basename "$cmd_file" .toml)"
                 dest_file="$CODEX_PLUGIN_PATH/commands/${base}.md"
-                "$script_dir/toml_to_codex_cmd.sh" "$cmd_file" "$dest_file" "$skill"
+                "$script_dir/scripts/toml_to_codex_cmd.sh" "$cmd_file" "$dest_file" "$skill"
             done
         fi
     fi
@@ -270,7 +271,7 @@ case "$AGENT" in
 esac
 
 # Check if we are in the repo or need to clone it
-if [ ! -f "install.sh" ] || [ "$(find . -maxdepth 2 -name "SKILL.md" | wc -l)" -eq 0 ]; then
+if [ ! -f "install.sh" ] || [ "$(find "./$SKILLS_SRC_DIR" -maxdepth 2 -name "SKILL.md" 2>/dev/null | wc -l)" -eq 0 ]; then
     echo "Skills not found locally. Preparing remote installation..."
     if ! command -v git >/dev/null 2>&1; then
         echo "Error: git is required for remote installation."
@@ -287,7 +288,7 @@ for agent in $AGENTS; do
 done
 
 # Find available skills (directories with SKILL.md), including generic skills such as release-management
-SKILLS=$(find . -maxdepth 2 -name "SKILL.md" | xargs -n1 dirname | sed 's|^\./||' | sort | uniq)
+SKILLS=$(find "./$SKILLS_SRC_DIR" -maxdepth 2 -name "SKILL.md" | xargs -n1 dirname | xargs -n1 basename | sort | uniq)
 
 for skill in $SKILLS; do
     if [ "$skill" = "." ]; then

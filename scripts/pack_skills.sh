@@ -26,7 +26,7 @@ package_one() {
 if [ -z "$1" ] || [ "$1" == "all" ]; then
     echo "Scanning for all skills in the repository..."
     # Find all directories containing a SKILL.md file, excluding the dist folder and hidden dirs
-    find . -maxdepth 2 -name "SKILL.md" -not -path "./dist/*" -not -path "*/.*" | while read -r skill_file; do
+    find ./skills -maxdepth 2 -name "SKILL.md" -not -path "*/.*" | while read -r skill_file; do
         skill_dir=$(dirname "$skill_file")
         # Strip the './' prefix for cleaner output
         skill_dir=${skill_dir#./}
