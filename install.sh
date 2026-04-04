@@ -92,6 +92,10 @@ install_skill_for_agent() {
     echo "Installing $skill for $agent..."
 
     SKILL_TARGET="$INSTALL_PATH/skills/$skill"
+    # Remove stale symlinks or files that would block mkdir
+    if [ -L "$SKILL_TARGET" ] || [ -e "$SKILL_TARGET" ]; then
+        rm -rf "$SKILL_TARGET"
+    fi
     mkdir -p "$SKILL_TARGET"
 
     if command -v rsync >/dev/null 2>&1; then
@@ -103,6 +107,9 @@ install_skill_for_agent() {
 
     if [ "$agent" = "codex" ]; then
         CODEX_SKILL_TARGET="$CODEX_PLUGIN_PATH/skills/$skill"
+        if [ -L "$CODEX_SKILL_TARGET" ] || [ -e "$CODEX_SKILL_TARGET" ]; then
+            rm -rf "$CODEX_SKILL_TARGET"
+        fi
         mkdir -p "$CODEX_SKILL_TARGET"
 
         if command -v rsync >/dev/null 2>&1; then
