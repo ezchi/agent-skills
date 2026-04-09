@@ -110,6 +110,8 @@ Current commands:
 | `/sv-synth-check` | Check for synthesis risks (latches, non-synth constructs) |
 | `/sv-sva-check` | Review SVA best practices |
 | `/sv-clean-code` | Review for Clean Code principles |
+| `/sv-test-review` | Review testbenches using the FPGA Verification Expert workflow |
+| `/cocotb-test-review` | Review Cocotb testbenches using the FPGA Verification Expert workflow |
 | `/sv-verilator-check` | Check for Verilator compatibility issues |
 
 ## Engineering Standards

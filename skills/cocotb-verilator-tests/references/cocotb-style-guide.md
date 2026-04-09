@@ -1,5 +1,14 @@
 # Cocotb Testbench Style Guide
 
+## Verification Integrity
+
+- **Never compromise test quality to make tests pass.** If a test fails, the DUT is wrong — not the test. Do not loosen assertions, reduce transaction counts, widen tolerance margins, comment out checks, or skip scenarios.
+- **Maximize assertion density.** Every output with a defined relationship must be checked. Every protocol invariant must have a monitor coroutine asserting it continuously. Unchecked signals are silent corruption waiting to happen.
+- **Scoreboard every data path.** If data enters and exits the DUT, a scoreboard must compare every transaction. Do not rely on waveform inspection.
+- **Test error paths, not just happy paths.** Error/overflow/underflow outputs must be tested for both assertion (when the condition occurs) and non-assertion (when it should not occur). A test suite that only exercises normal operation is incomplete.
+- **Check on every transaction, not at the end.** Assertions and scoreboard checks should fire per-transaction in a monitor coroutine, not in a summary block at test completion. Late checking hides the cycle where corruption began.
+- **Monitor coroutines for protocol invariants.** Use `cocotb.start_soon()` to launch background coroutines that continuously check protocol rules (e.g., "valid must not rise during reset", "data must be stable while valid and not ready"). These catch violations regardless of which stimulus sequence is running.
+
 ## Naming Conventions
 - Testbench files should be named `test_<module_name>.py`.
 - Tests should be decorated with `@cocotb.test()` and named descriptively (e.g., `async def test_fifo_overflow(dut):`).
@@ -93,6 +102,54 @@ async def test_fifo_random(dut):
     random.seed(42)  # same values every run — defeats the purpose of randomization
     ...
 ```
+
+## Test Categories (Both Required)
+
+- **Directed tests:** Deterministic stimulus for specific scenarios — reset behavior, boundary values, known protocol edge cases. Every test suite must have at least one directed test.
+- **Random constrained tests:** Randomized stimulus within legal constraints for broad coverage. Every test suite must have at least one random constrained test. Random tests must use the `random_seed` fixture and log their seed.
+
+## Transaction Protocol Rules
+
+When the DUT uses valid/ready, valid/data, request/grant, or similar handshake interfaces:
+
+- **Back-to-back transactions (mandatory test):** Send consecutive transactions with zero idle cycles between them. This stresses pipeline, handshake, and state machine logic.
+- **Random inter-transaction gaps (mandatory test):** Insert `random.randint(0, MAX_GAP)` idle cycles between transactions. This tests the DUT under varying throughput and exposes idle-state bugs.
+- **Random data when valid is deasserted (mandatory):** When `valid` (or equivalent qualifier) is low, drive random garbage on data buses. NEVER leave data at zero or at the last valid value. This catches bugs where the DUT samples data outside the valid window.
+
+Good:
+```python
+async def drive_txn(dut, data):
+    dut.i_valid.value = 1
+    dut.i_data.value = data
+    await delay_cc(dut, 1)
+    dut.i_valid.value = 0
+    dut.i_data.value = random.randint(0, DATA_MASK)  # random garbage when invalid
+
+async def drive_with_random_gap(dut, data):
+    await drive_txn(dut, data)
+    gap = random.randint(0, MAX_GAP)
+    for _ in range(gap):
+        dut.i_data.value = random.randint(0, DATA_MASK)  # keep data random while idle
+        await delay_cc(dut, 1)
+```
+
+Poor:
+```python
+async def drive_txn(dut, data):
+    dut.i_valid.value = 1
+    dut.i_data.value = data
+    await delay_cc(dut, 1)
+    dut.i_valid.value = 0
+    dut.i_data.value = 0  # BUG: data is zero when invalid — hides sampling bugs
+```
+
+## Stress Tests (Mandatory)
+
+- **Every DUT must have at least one stress test.** A stress test is a long-running random test that exercises the DUT under sustained load.
+- Parameterize the transaction count via a named constant `NUM_STRESS_TXNS` (default: thousands, e.g., 10_000).
+- Stress tests must combine: back-to-back bursts, random gaps, random data, and random valid/invalid patterns.
+- Use a scoreboard or reference model to verify correctness across the entire run.
+- Stress tests must be reproducible via the `random_seed` fixture / `COCOTB_RANDOM_SEED` environment variable.
 
 ## No Magic Numbers
 - **Every meaningful literal must be a named constant.** Do not scatter bare numbers (other than 0 and 1) across test code. Define them at the top of the file or in a shared constants module.

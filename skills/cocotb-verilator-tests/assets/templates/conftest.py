@@ -15,18 +15,31 @@ def pytest_addoption(parser):
         default=False,
         help="Enable waveform dumping (e.g., vcd/fst files)",
     )
+    parser.addoption(
+        "--seed",
+        type=int,
+        default=None,
+        help="Random seed for reproducible test runs (overrides COCOTB_RANDOM_SEED)",
+    )
 
 
 @pytest.fixture(autouse=True)
-def random_seed():
+def random_seed(request):
     """Seed the random module for reproducible-yet-varying test runs.
 
-    Override with: COCOTB_RANDOM_SEED=<int> pytest ...
+    Priority: --seed CLI flag > COCOTB_RANDOM_SEED env var > time.time_ns()
+    Reproduce a run: pytest --seed=<value> ...
     """
+    cli_seed = request.config.getoption("--seed")
     env_seed = os.environ.get("COCOTB_RANDOM_SEED")
-    seed = int(env_seed) if env_seed else time.time_ns()
+    if cli_seed is not None:
+        seed = cli_seed
+    elif env_seed:
+        seed = int(env_seed)
+    else:
+        seed = time.time_ns()
     random.seed(seed)
-    cocotb.log.info("Random seed: %d  (reproduce with COCOTB_RANDOM_SEED=%d)", seed, seed)
+    cocotb.log.info("Random seed: %d  (reproduce with --seed=%d)", seed, seed)
     return seed
 
 

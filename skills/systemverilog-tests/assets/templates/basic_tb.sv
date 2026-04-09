@@ -3,6 +3,8 @@
 module {{dut_name}}_tb;
 
 localparam int LP_WIDTH = {{width}};
+localparam int LP_NUM_STRESS_TXNS = 10_000;
+localparam int LP_MAX_GAP = 8;
 
 logic clk;
 logic rst;
@@ -21,6 +23,13 @@ initial begin
     #1ms;
     $error("Simulation timeout reached!");
     $finish;
+end
+
+// Random seed — accept +seed=<N> for reproducibility
+int unsigned seed;
+initial begin
+    if (!$value$plusargs("seed=%d", seed)) seed = $urandom;
+    $display("Random seed: %0d  (reproduce with +seed=%0d)", seed, seed);
 end
 
 task automatic delay_cc(input int cycles);
@@ -42,7 +51,7 @@ initial begin
     reset_pulse();
 
     // Apply stimulus sequences
-    #1us;
+    {{stimulus_sequence}}
 
     delay_cc(2);
     $finish;
