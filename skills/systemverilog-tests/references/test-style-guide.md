@@ -1,5 +1,14 @@
 # SystemVerilog Testbench Style Guide
 
+## Verification Integrity
+
+- **Never compromise test quality to make tests pass.** If a test fails, the DUT is wrong — not the test. Do not loosen assertions, reduce transaction counts, widen tolerance margins, comment out checks, or skip scenarios.
+- **Maximize assertion density.** Every output with a defined relationship must be checked. Every protocol invariant must have a concurrent assertion. Unchecked signals are silent corruption waiting to happen.
+- **Scoreboard every data path.** If data enters and exits the DUT, a scoreboard must compare every transaction. Do not rely on waveform inspection.
+- **Test error paths, not just happy paths.** Error/overflow/underflow outputs must be tested for both assertion (when the condition occurs) and non-assertion (when it should not occur). A test suite that only exercises normal operation is incomplete.
+- **Check on every transaction, not at the end.** Assertions and scoreboard checks should fire per-transaction or per-cycle, not in a summary block at the end of the test. Late checking hides the cycle where corruption began.
+- **Concurrent assertions for protocol invariants.** Use `assert property` for rules that must hold at all times (e.g., "valid must not rise during reset", "data must be stable while valid && !ready"). These catch violations regardless of which test is running.
+
 ## Naming
 
 - testbench modules end with `_tb`
@@ -36,3 +45,78 @@
 - **Named events — use `->>` (non-blocking trigger):** Use `->>` instead of `->` for named events. A blocking `->` can resolve before a concurrent `@(event)` is re-armed, causing trigger-before-wait deadlocks.
 - **Edge-sensitive expressions:** Prefer `@(posedge clk iff (cond))` over `@(expr == val)`. The latter triggers on every change of `expr`, not just the transition to the target value, and races with the process that writes `expr`.
 - assertions for protocol and reset correctness
+
+## Reproducible Randomness
+
+- **Seed via plusarg:** Every testbench that uses random stimulus MUST accept `+seed=<N>` via `$value$plusargs`. If not provided, derive a seed from `$urandom`.
+- **Log the seed:** Always `$display` the seed at simulation start so failures can be reproduced with `+seed=<value>`.
+- **Use `$urandom` / `$urandom_range`** for all random stimulus generation. Never use `$random` (signed, old-style).
+- **Prefer random data over hardcoded constants** wherever possible. Hardcode only when testing a specific known boundary or protocol requirement.
+
+Good:
+```systemverilog
+int unsigned seed;
+initial begin
+    if (!$value$plusargs("seed=%d", seed)) seed = $urandom;
+    $display("Random seed: %0d  (reproduce with +seed=%0d)", seed, seed);
+end
+```
+
+Poor:
+```systemverilog
+initial begin
+    data_in = 32'hDEAD_BEEF;  // hardcoded — covers one value forever
+end
+```
+
+## Test Categories (Both Required)
+
+- **Directed tests:** Deterministic stimulus for specific scenarios — reset behavior, boundary values, known protocol edge cases. Every test suite must have at least one directed test.
+- **Random constrained tests:** Randomized stimulus within legal constraints for broad coverage. Every test suite must have at least one random constrained test. Random tests must log their seed.
+
+## Transaction Protocol Rules
+
+When the DUT uses valid/ready, valid/data, request/grant, or similar handshake interfaces:
+
+- **Back-to-back transactions (mandatory test):** Send consecutive transactions with zero idle cycles between them. This stresses pipeline, handshake, and state machine logic.
+- **Random inter-transaction gaps (mandatory test):** Insert `$urandom_range(0, MAX_GAP)` idle cycles between transactions. This tests the DUT under varying throughput and exposes idle-state bugs.
+- **Random data when valid is deasserted (mandatory):** When `valid` (or equivalent qualifier) is low, drive random garbage on data buses. NEVER leave data at zero or at the last valid value. This catches bugs where the DUT samples data outside the valid window.
+
+Good:
+```systemverilog
+task automatic drive_txn(input logic [WIDTH-1:0] data);
+    o_valid <= 1;
+    o_data  <= data;
+    delay_cc(1);
+    o_valid <= 0;
+    o_data  <= $urandom;  // random garbage when invalid
+endtask
+
+task automatic drive_with_random_gap();
+    drive_txn($urandom);
+    // Random idle gap
+    repeat ($urandom_range(0, LP_MAX_GAP)) begin
+        o_data <= $urandom;  // keep data random while idle
+        delay_cc(1);
+    end
+endtask
+```
+
+Poor:
+```systemverilog
+task automatic drive_txn(input logic [WIDTH-1:0] data);
+    o_valid <= 1;
+    o_data  <= data;
+    delay_cc(1);
+    o_valid <= 0;
+    o_data  <= '0;  // BUG: data is zero when invalid — hides sampling bugs
+endtask
+```
+
+## Stress Tests (Mandatory)
+
+- **Every DUT must have at least one stress test.** A stress test is a long-running random test that exercises the DUT under sustained load.
+- Parameterize the transaction count via `LP_NUM_STRESS_TXNS` (default: thousands, e.g., 10_000).
+- Stress tests must combine: back-to-back bursts, random gaps, random data, and random valid/invalid patterns.
+- Use a scoreboard or reference model to verify correctness across the entire run.
+- Stress tests must be reproducible via the `+seed=<N>` plusarg.

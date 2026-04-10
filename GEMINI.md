@@ -88,6 +88,12 @@ Once installed, the following slash commands are available to streamline your Sy
 - `/sv-sva-check <file>`: Review SVA files for best practices.
 - `/sv-clean-code <file>`: Review code for Clean Code principles (Single Responsibility, etc.).
 
+### SystemVerilog Tests
+- `/sv-test-review <file>`: Review testbenches using the FPGA Verification Expert workflow.
+
+### Cocotb Tests
+- `/cocotb-test-review <file>`: Review Cocotb testbenches using the FPGA Verification Expert workflow.
+
 ### Verilator
 - `/sv-verilator-check <file>`: Check for Verilator-specific compatibility issues.
 

@@ -1,2 +1,7 @@
 /.agent-skills-tabspaces-session.el
 /dist/
+/plugins/
+/.agents/
+/.gemini/
+/.claude/
+/.codex/

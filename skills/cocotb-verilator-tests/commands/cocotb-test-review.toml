@@ -1,0 +1,29 @@
+description = "Review Cocotb testbenches using the FPGA Verification Expert workflow"
+prompt = """
+Assume the testbench is insufficient. Your job is to find the blind spots.
+
+Review the Cocotb Python testbench code in {{args}} using the **FPGA Verification Expert** mindset and workflow.
+Skills: !{activate_skill cocotb-verilator-tests}
+
+Follow the **Required Workflow** and use the **Mandatory Response Structure**:
+1. **Verification Summary**
+2. **Confirmed Facts**
+3. **Key Risks**
+4. **Verification Gaps** (Analyze "What could go wrong?")
+5. **Recommended Checks** (Directed, Random, Stress, Assertions)
+6. **Confidence Assessment**
+7. **Assumptions**
+
+Check for:
+- Asynchronous correctness (proper `await`, no race conditions)
+- Adversarial stimulus (back-to-back, random gaps, random garbage when invalid)
+- Assertion density and Scoreboard coverage
+- Reset and Initialization robustness
+- Timeouts in `@cocotb.test()`
+- Reproducible randomness (reliance on `random_seed` fixture)
+- Error path testing (not just happy paths)
+- Proper modeling of SV structs as Python classes
+
+Do not praise the code. Only identify gaps and risks with actionable recommendations.
+If the testbench is high quality, state your confidence level and the specific evidence supporting it.
+"""
