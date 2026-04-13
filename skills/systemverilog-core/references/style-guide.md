@@ -436,6 +436,50 @@ end
 * Every `always_comb` must fully assign all outputs.
 * Use **early defaults**.
 
+### Explicit Reset Strategy (Mandatory)
+
+To minimize **reset fanout**, improve timing closure, and reduce area/power, only reset signals that are absolutely necessary for the design to reach a known, safe state (e.g., control logic, valid flags, and state variables). Data-path signals (e.g., pipeline registers) should generally **not** be reset.
+
+Signals with a reset and signals without a reset **must** be placed in separate `always_ff` blocks.
+
+*   **Signals with Reset**: Control signals, valid flags, and state variables.
+*   **Signals without Reset**: Data-path signals (e.g., `pipe_data`) where the previous value can be held without impact on correctness during reset. This reduces the load on the reset net and saves flip-flop reset routing.
+
+Bad — Mixed reset/non-reset in the same block:
+```systemverilog
+always_ff @(posedge clk) begin
+    if (i_rst) begin
+        pipe_valid <= 1'b0;
+    end else begin
+        if (pipe_enable) begin
+            pipe_valid <= i_valid;
+            pipe_data  <= i_data;  // pipe_data has no reset assignment
+        end
+    end
+end
+```
+
+Good — Separate blocks for reset and non-reset signals:
+```systemverilog
+// Control signal with reset
+always_ff @(posedge clk) begin
+    if (i_rst) begin
+        pipe_valid <= 1'b0;
+    end else begin
+        if (pipe_enable) begin
+            pipe_valid <= i_valid;
+        end
+    end
+end
+
+// Data path without reset
+always_ff @(posedge clk) begin
+    if (pipe_enable) begin
+        pipe_data <= i_data;
+    end
+end
+```
+
 ### No Implicit Nets
 
 `` `default_nettype none `` must be the **first line of SystemVerilog code** in every file, and `` `default_nettype wire `` must be the **last line of SystemVerilog code**. File-header comments and blank lines may precede `` `default_nettype none ``, but no other SV code may appear before it. This prevents implicit net declarations and ensures clean compilation units.
@@ -827,6 +871,8 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - Input/Output naming (i_*, o_*) for module ports only (including clocks and resets)
 - FSM state naming: state_curr / state_next
 - always_ff / always_comb only, one intent per block
+- Minimize reset fanout: only reset control signals, valid flags, and state variables — data-path signals (e.g., pipeline registers) should NOT be reset
+- Separate always_ff blocks for signals with reset and signals without reset
 - Early default assignments in all combinational logic
 - No implicit nets (`` `default_nettype none `` first SV line, `` `default_nettype wire `` last SV line)
 - Non-intrusive SVA in separate *_sva.sv files using bind

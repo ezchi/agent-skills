@@ -34,6 +34,8 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - `clk_<domain>`, `rst_<domain>` naming (or `i_clk`, `i_rst`, `i_reset` for ports).
     - Explicit `state_curr`, `state_next` FSMs.
     - `always_ff` and `always_comb` only.
+    - Minimize reset fanout: only reset control signals, valid flags, and state variables — data-path signals (e.g., pipeline registers) should NOT be reset.
+    - Separate always_ff blocks for signals with reset and signals without reset.
     - Follow minimum width rules (e.g., 12-bit for MTU pkt_len_t).
     - Use semantic typedefs (`pkt_len_t`, `addr_t`) instead of bare `logic [N:0]` — search existing packages for a matching typedef before defining a new one.
     - Always use `packed` for structs and unions.
