@@ -15,7 +15,7 @@ Follow the **Required Workflow** and use the **Mandatory Response Structure**:
 7. **Assumptions**
 
 Check for:
-- Asynchronous correctness (proper `await`, no race conditions)
+- Asynchronous correctness (proper `await`, no race conditions, **no `Timer` or `NextTimeStep`**)
 - Adversarial stimulus (back-to-back, random gaps, random garbage when invalid)
 - Assertion density and Scoreboard coverage
 - Reset and Initialization robustness
