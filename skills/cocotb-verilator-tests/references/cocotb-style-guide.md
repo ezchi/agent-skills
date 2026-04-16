@@ -13,7 +13,8 @@
 - Testbench files should be named `test_<module_name>.py`.
 - Tests should be decorated with `@cocotb.test()` and named descriptively (e.g., `async def test_fifo_overflow(dut):`).
 - Clocks should be generated using `cocotb.clock.Clock`.
-- **No `Timer()` for signal synchronization.** Never use `Timer(N, "ns")` to advance time in synchronous designs — it decouples the testbench from the clock and creates race conditions. Always synchronize to the clock edge via `await RisingEdge(dut.clk)` (or `delay_cc`).
+- **No `Timer()` or `NextTimeStep()` allowed.** Never use `Timer(N, "ns")` or `NextTimeStep()` to advance time or synchronize — they are incompatible with Verilator and create race conditions in synchronous designs. Always synchronize to the clock edge via `await RisingEdge(dut.clk)` or use `ReadOnly()` for sampling.
+- **No `FallingEdge` for driving or sampling.** It creates setup/hold races with `posedge`-clocked RTL. Use only `RisingEdge`.
 
 ## Project Structure & Runners
 - **Pytest Runner:** Prefer `cocotb_tools.runner` via a Python script (e.g., `runner.py` or `conftest.py`) over a legacy `Makefile`.
@@ -76,9 +77,7 @@ Understanding them prevents read/write races:
 * **Never use `ReadWrite` for normal driving.**  `ReadWrite` re-enters the Active
   region and can re-trigger delta cycles.  It is almost never needed in
   well-structured tests.
-* **No `Timer(0)`.**  `Timer(0, "ns")` is the cocotb equivalent of `#0` — it
-  advances by a delta cycle and creates the same scheduling races.  Use
-  `RisingEdge` or `ReadOnly` instead.
+* **No `Timer` or `NextTimeStep`.** These triggers are strictly forbidden. `Timer` (even with 0 delay) and `NextTimeStep` create scheduling races and are incompatible with Verilator's clock-driven model. Use `RisingEdge` or `ReadOnly` instead.
 
 ## Reproducible Randomness
 - **Every test file that uses randomness must seed `random` at the top of each test** using a seed derived from the environment or the current time.

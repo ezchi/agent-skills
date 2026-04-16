@@ -8,7 +8,9 @@ Reference: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 Check for:
 - Non-synthesizable constructs (initial, # delays)
 - Inferred latches
-- Reset completeness
+- Reset completeness:
+  - Check for separate blocks for reset and non-reset signals
+  - **Minimize reset fanout**: only reset control signals, valid flags, and state variables — flag unnecessary resets on data-path signals
 - Combinational loops
 
 Do not confirm correctness. Only report violations with file, line, and what is wrong.

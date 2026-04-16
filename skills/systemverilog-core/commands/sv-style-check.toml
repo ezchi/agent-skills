@@ -11,6 +11,8 @@ Check:
 - Clock & Reset naming (clk, rst, reset, or i_clk, i_rst, i_reset for ports)
 - FSM state naming (state_curr/next)
 - All case statements must use `unique case` — flag bare `case` and `priority case`
+- Separate `always_ff` blocks for signals with reset and signals without reset
+- **Minimize reset fanout**: only reset control, valid, and state signals; do not reset data-path registers
 - _t suffix for types
 - Width consistency
 - Race-condition patterns:
