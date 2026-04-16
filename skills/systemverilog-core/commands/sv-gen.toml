@@ -10,4 +10,5 @@ Ensure:
 - clk, rst, reset naming (or i_clk, i_rst, i_reset for ports)
 - One module per file
 - No implicit nets (default_nettype none as first SV line, default_nettype wire as last SV line)
+- Use `logic` for all synthesizable RTL ports and internal signals; do not use `wire` unless a true tri-state/inout net is required
 """

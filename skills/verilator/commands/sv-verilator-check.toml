@@ -9,6 +9,7 @@ Check for:
 - Dynamic arrays/queues slicing issues
 - Complex streaming operators
 - Dependency ordering risks
+- `wire` used in ordinary synthesizable RTL where `logic` should be used instead, unless a true tri-state or `inout` net requires net semantics
 
 Do not confirm correctness. Only report violations with file, line, and what is wrong.
 If you find nothing, say so in one line — do not pad with praise.

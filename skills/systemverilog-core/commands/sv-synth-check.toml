@@ -8,6 +8,7 @@ Reference: !{cat __SKILLS_DIR__/systemverilog-core/references/style-guide.md}
 Check for:
 - Non-synthesizable constructs (initial, # delays)
 - Inferred latches
+- Signal declaration discipline: flag `wire` in synthesizable RTL unless it is required for a true tri-state or `inout` net
 - Reset completeness:
   - Check for separate blocks for reset and non-reset signals
   - **Minimize reset fanout**: only reset control signals, valid flags, and state variables — flag unnecessary resets on data-path signals
