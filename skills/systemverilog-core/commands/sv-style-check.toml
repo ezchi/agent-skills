@@ -9,6 +9,7 @@ Check:
 - File naming suffixes (_tb.sv, _intf.sv, _pkg.sv, _ct.svh)
 - Naming conventions (signals, modules, instances, ports)
 - Clock & Reset naming (clk, rst, reset, or i_clk, i_rst, i_reset for ports)
+- Signal declaration rules: in synthesizable RTL, use `logic` for ports and internal signals; flag `wire` unless it is clearly required for a true tri-state or `inout` net
 - FSM state naming (state_curr/next)
 - All case statements must use `unique case` — flag bare `case` and `priority case`
 - Separate `always_ff` blocks for signals with reset and signals without reset

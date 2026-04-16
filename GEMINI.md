@@ -31,6 +31,7 @@ All skills and generated code must adhere to the **SystemVerilog Style Guide** (
     *   One module/class per file.
     *   File names must match the entity name.
     *   No implicit nets: Always start files with `` `default_nettype none ``.
+*   **Signal Declarations**: In synthesizable RTL, use `logic` for ports and internal signals. Reserve `wire` only for true tri-state or `inout` nets.
 *   **Tool Compatibility**: Optimized for **Verilator**, **Cocotb**, and standard synthesis tools.
 
 ## Installation

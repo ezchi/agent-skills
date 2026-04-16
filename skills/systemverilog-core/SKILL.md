@@ -34,6 +34,7 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - `clk_<domain>`, `rst_<domain>` naming (or `i_clk`, `i_rst`, `i_reset` for ports).
     - Explicit `state_curr`, `state_next` FSMs.
     - `always_ff` and `always_comb` only.
+    - Declare synthesizable design signals and ports as `logic`; do not use `wire` in RTL unless a true tri-state/inout net is required.
     - Minimize reset fanout: only reset control signals, valid flags, and state variables — data-path signals (e.g., pipeline registers) should NOT be reset.
     - Separate always_ff blocks for signals with reset and signals without reset.
     - Follow minimum width rules (e.g., 12-bit for MTU pkt_len_t).
@@ -48,20 +49,23 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - Organize shared constants and types into domain-scoped packages (`<domain>_pkg`), not one monolithic package. Keep related definitions together; do not scatter them across unrelated files.
     - Prefer explicit imports (`import pkg::symbol`) over wildcard in RTL.
     - Prefer self-documenting code over comments — use meaningful names, semantic typedefs, and clear structure; only comment *why*, never *what*.
-4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs, no magic numbers, no raw `logic [N:0]` where a semantic typedef exists, no magic bit-slicing on bundled signals, no "what" comments that duplicate code, no duplicated types/modules that already exist in the codebase).
+4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs, no magic numbers, no raw `logic [N:0]` where a semantic typedef exists, no magic bit-slicing on bundled signals, no `wire` declarations in synthesizable RTL except true tri-state/inout nets, no "what" comments that duplicate code, no duplicated types/modules that already exist in the codebase).
 
 ### 2. Review & Refactor (`/sv-style-check`, `/sv-clean-code`)
 When asked to review or fix code:
 1. **Analyze:** Check the code against `references/style-guide.md`. Search the codebase for duplicated logic, types, or constants that should be consolidated.
+   - Treat any `wire` declaration in synthesizable RTL as a violation unless it is clearly required for a true tri-state or `inout` net.
 2. **Report:** List specific violations with line numbers.
     - *Example:* "Line 10: `always @(posedge clk)` usage violation. Use `always_ff`."
     - *Example:* "Line 15: Signal `data_c` used before declaration. Declare all signals before use to avoid implicit nets."
+    - *Example:* "Line 22: `wire grant_c;` violates RTL declaration rules. Use `logic grant_c;` unless this is a true tri-state or `inout` net."
 3. **Refactor:** If requested, rewrite the code to fix these issues while preserving functionality.
 
 ### 3. Synthesis Check (`/sv-synth-check`)
 1. Scan for non-synthesizable constructs (`initial`, `# delays`, `fork/join`, `force`).
 2. Verify reset logic completeness.
 3. Check for combinational loops.
+4. Flag `wire` declarations in synthesizable RTL unless they are required for true tri-state or `inout` net semantics.
 
 ## Available Resources
 
