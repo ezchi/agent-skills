@@ -1,5 +1,3 @@
-`default_nettype none
-
 module {{module_name}} (
     output logic o_out1,
     output logic o_out2,
@@ -63,5 +61,3 @@ always_comb begin
 end
 
 endmodule
-
-`default_nettype wire

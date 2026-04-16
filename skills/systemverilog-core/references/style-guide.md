@@ -16,7 +16,7 @@
 1. **Clarity over cleverness**
 
    * Prefer explicit logic over compact but opaque constructs.
-   * Avoid implicit sizing, implicit nets, and ambiguous expressions.
+   * Avoid implicit sizing and ambiguous expressions.
 
 2. **Single responsibility**
 
@@ -480,22 +480,20 @@ always_ff @(posedge clk) begin
 end
 ```
 
-### No Implicit Nets
+### Explicit Signal Declaration (Mandatory)
 
-`` `default_nettype none `` must be the **first line of SystemVerilog code** in every file, and `` `default_nettype wire `` must be the **last line of SystemVerilog code**. File-header comments and blank lines may precede `` `default_nettype none ``, but no other SV code may appear before it. This prevents implicit net declarations and ensures clean compilation units.
+All signals (logic, wire, types) **must** be declared before they are used in any assignment, module instance, or procedural block. This prevents reliance on implicit net declarations and ensures that all signal types and widths are explicitly defined and visible to the reader.
 
+Good:
 ```systemverilog
-// ============================================================
-// my_module.sv — Brief description
-// ============================================================
+logic [7:0] data_c;
+assign data_c = i_data + 1'b1;
+```
 
-`default_nettype none
-
-module my_module (...);
-  ...
-endmodule
-
-`default_nettype wire
+Poor:
+```systemverilog
+assign data_c = i_data + 1'b1; // data_c used before declaration (or implicit)
+logic [7:0] data_c;
 ```
 
 ### Avoid Gotchas
@@ -845,7 +843,6 @@ assign wr_ptr_gray = wr_ptr ^ (wr_ptr >> 1);
 
 * No inferred latches
 * No unused signals
-* No implicit nets
 * All enums fully covered
 
 ---
@@ -874,7 +871,7 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - Minimize reset fanout: only reset control signals, valid flags, and state variables — data-path signals (e.g., pipeline registers) should NOT be reset
 - Separate always_ff blocks for signals with reset and signals without reset
 - Early default assignments in all combinational logic
-- No implicit nets (`` `default_nettype none `` first SV line, `` `default_nettype wire `` last SV line)
+- All signals **must** be declared before they are used (prevents implicit nets)
 - Non-intrusive SVA in separate *_sva.sv files using bind
 - Assertions observe only, never drive signals
 - Verilator + Cocotb compatible (no exotic SV features)
@@ -970,6 +967,7 @@ Checks:
 - Ambiguous or abbreviated names
 - Hidden coupling via packages or macros
 - Comment quality (why vs what)
+- **Signals used before declaration** (implicit net prevention)
 
 Output:
 - Readability and maintainability score
@@ -980,7 +978,6 @@ Output:
 ## 13. Recommended Defaults
 
 - `timescale 1ns/1ps
-- `default_nettype none (first SV line) / `default_nettype wire (last SV line)
 - Explicit resets in all sequential logic
 
 ---

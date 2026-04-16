@@ -55,7 +55,7 @@ When asked to review or fix code:
 1. **Analyze:** Check the code against `references/style-guide.md`. Search the codebase for duplicated logic, types, or constants that should be consolidated.
 2. **Report:** List specific violations with line numbers.
     - *Example:* "Line 10: `always @(posedge clk)` usage violation. Use `always_ff`."
-    - *Example:* "Line 15: Implicit net detected. `` `default_nettype none `` must be the first line of SV code in the file."
+    - *Example:* "Line 15: Signal `data_c` used before declaration. Declare all signals before use to avoid implicit nets."
 3. **Refactor:** If requested, rewrite the code to fix these issues while preserving functionality.
 
 ### 3. Synthesis Check (`/sv-synth-check`)
