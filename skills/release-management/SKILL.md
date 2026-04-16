@@ -15,18 +15,20 @@ You are a careful release engineer. You verify the repository state, detect the 
 
 ## Safety Rules
 
-- Do not create commits, merges, tags, pushes, or GitHub releases without explicit user approval.
-- Before any release action, inspect the repo state and explain the exact release plan.
-- If the working tree is dirty, stop and ask how to proceed.
-- If version files do not match the latest release tag, call that out before releasing.
+- **Stateless Approvals**: Approvals are non-transferable. An approval given in a previous turn or for a previous release attempt does **NOT** apply to the current plan. Every execution of `/repo-release` MUST obtain a fresh, explicit confirmation for its specific plan and its specific push step, even if the user previously gave "blanket" permission.
+- Do not create commits, merges, tags, pushes, or GitHub releases without explicit user approval of the **entire** release plan.
+- Before any release action, inspect the repo state and present a detailed, step-by-step release plan to the user.
+- If the working tree is dirty (has uncommitted changes), you **must** stop and ask the user how to proceed (e.g., commit them first, stash them, or include them in the release). Do not automatically commit existing code changes.
+- Never push to a remote repository without a final confirmation for the push action specifically, even if the release plan was previously approved.
 - Never commit directly on the release branch. Make release-related commits on the source or development branch first, then merge into the release branch.
 
 ## Interactive Confirmation
 
-This skill must be interactive for the two highest-risk release parameters:
+This skill must be interactive and require explicit confirmation for:
 
-- release branch
-- release tag
+- The release branch and release tag.
+- The proposed release plan (the sequence of actions).
+- The final push to remote.
 
 Detect likely values first, then ask the user to confirm them before taking release actions.
 
@@ -90,17 +92,24 @@ Choose the release flow that matches the repo and the user's stated process.
 
 Common direct release flow:
 
-1. Detect the release branch and ask the user to confirm it.
-2. Detect the target release tag and ask the user to confirm it.
-3. Confirm which version files should be updated.
-4. Update version files.
-5. Run the relevant build or validation steps on the source or development branch to catch obvious release breakage.
-6. Commit the version bump or release-prep changes on the source or development branch, never on the release branch.
-7. Merge the source branch into the confirmed release branch.
-8. Create an annotated tag such as `v0.4.0` on the release commit.
-9. If the repo workflow requires it, merge the release branch back into the development branch.
-10. Push branches and the new tag to `origin`.
-11. Only if the repo is on GitHub and `gh` is available and authenticated in a non-sandboxed check, create the GitHub Release from the existing tag using `--notes-file`.
-12. After the release steps are complete, check out the development branch again so follow-up work does not continue on the release branch by accident.
+1. **Inspect**: Gather all necessary repo state (branch, tags, status, remotes).
+2. **Detect**: Suggest the release branch and target release tag.
+3. **Plan**: Present a step-by-step plan to the user, including:
+    - Any version files to be updated.
+    - The commit message for the version bump.
+    - The merge direction (e.g., `develop` -> `main`).
+    - The tag name and message.
+    - The branches and tags to be pushed.
+4. **Confirm Plan**: Ask the user: "Do you want to proceed with this release plan?"
+5. **Execute Local Actions**:
+    - Update version files.
+    - Commit the version bump on the source branch.
+    - Merge into the release branch.
+    - Create the annotated tag.
+6. **Confirm Push**: Before pushing, ask: "Ready to push [branches/tags] to [remote]?"
+7. **Execute Remote Actions**:
+    - Push branches and the new tag.
+    - Create the GitHub Release if applicable.
+8. **Cleanup**: Check out the development branch and confirm completion.
 
 If the repo uses Git Flow or another explicit release-branch workflow, follow that instead of the direct flow.
