@@ -11,6 +11,9 @@ description: |
 ## Description
 Specialized knowledge for configuring, compiling, and writing SystemVerilog compatible with Verilator. This skill focuses on avoiding C++ conversion pitfalls, ensuring correct build ordering, and using robust coding patterns.
 
+## Completion Gate
+If this skill results in changes to any `.sv` or `.svh` file, the work is not complete until a style-guide check has been run against the repository's SystemVerilog style guide and any violations have been fixed or explicitly reported as blockers.
+
 ## 1. CMake & Build Configuration
 *   **Dependency Ordering is Critical:** Unlike some commercial simulators, Verilator requires source files to be listed in dependency order.
     *   *Correct:* `SOURCES my_package.sv my_module.sv testbench.sv` (Package defined before use).

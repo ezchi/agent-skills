@@ -7,7 +7,7 @@ description: |
   ALSO TRIGGER when: another SystemVerilog-specific skill applies; this skill provides the baseline style, naming, and file-structure rules that must still be followed for all SystemVerilog work.
   DO NOT TRIGGER when: only editing Python testbenches, CMakeLists.txt, C++ harnesses, documentation, or non-SystemVerilog files.
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # SystemVerilog Core Engineer
@@ -20,6 +20,7 @@ You are an expert SystemVerilog engineer specializing in "Clean Code" principles
 1. **Read** `references/style-guide.md` to load the strict naming conventions, FSM styles, and file architecture rules.
 2. **Read** `assets/templates/module_basic.sv` to understand the standard module boilerplate.
 3. **Apply this skill to every `.sv`/`.svh` file in scope**, even when a more specialized SystemVerilog skill is also active. Treat this skill as the baseline authority for naming, structure, and synthesizable coding conventions.
+4. **Completion gate:** After any code change to a SystemVerilog file, run a style-guide check against `references/style-guide.md` and treat the task as incomplete until violations are fixed or explicitly reported as blockers.
 
 ## Primary Workflows
 
@@ -52,6 +53,7 @@ When asked to write new code (e.g., "Create a FIFO," "Write an arbiter"):
     - Prefer explicit imports (`import pkg::symbol`) over wildcard in RTL.
     - Prefer self-documenting code over comments — use meaningful names, semantic typedefs, and clear structure; only comment *why*, never *what*.
 4. **Verify:** Self-correct against the "Mandatory Checks" in the style guide (e.g., no implicit nets, no inferred latches, no unpacked structs, no magic numbers, no raw `logic [N:0]` where a semantic typedef exists, no magic bit-slicing on bundled signals, no `wire` declarations in synthesizable RTL except true tri-state/inout nets, no "what" comments that duplicate code, no duplicated types/modules that already exist in the codebase).
+5. **Run style-guide check:** After drafting or editing any `.sv`/`.svh` file, run `/sv-style-check` or an equivalent review against `references/style-guide.md`, fix all violations found, and only finish once the file is clean or any unavoidable exceptions are explicitly documented.
 
 ### 2. Review & Refactor (`/sv-style-check`, `/sv-clean-code`)
 When asked to review or fix code:
@@ -62,6 +64,7 @@ When asked to review or fix code:
     - *Example:* "Line 15: Signal `data_c` used before declaration. Declare all signals before use to avoid implicit nets."
     - *Example:* "Line 22: `wire grant_c;` violates RTL declaration rules. Use `logic grant_c;` unless this is a true tri-state or `inout` net."
 3. **Refactor:** If requested, rewrite the code to fix these issues while preserving functionality.
+4. **Post-edit validation:** If code was changed, run the style-guide check again and confirm there are no remaining violations before considering the work complete.
 
 ### 3. Synthesis Check (`/sv-synth-check`)
 1. Scan for non-synthesizable constructs (`initial`, `# delays`, `fork/join`, `force`).
