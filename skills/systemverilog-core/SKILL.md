@@ -3,10 +3,11 @@ name: systemverilog-core
 description: |
   Core skill for planning SystemVerilog module, generating, refactoring, and reviewing SystemVerilog code
   using templates and a structured style guide.
-  TRIGGER when: creating, modifying, refactoring, or reviewing `.sv`/`.svh` RTL files, or user asks to generate/plan a SystemVerilog module, FSM, interface, or package.
-  DO NOT TRIGGER when: only editing Python testbenches, CMakeLists.txt, C++ harnesses, documentation, or non-RTL files.
+  TRIGGER when: creating, modifying, refactoring, linting, debugging, or reviewing any SystemVerilog file (`.sv`, `.svh`), or when the user asks for help with SystemVerilog modules, interfaces, packages, assertions, typedefs, structs, enums, tasks, functions, or FSMs.
+  ALSO TRIGGER when: another SystemVerilog-specific skill applies; this skill provides the baseline style, naming, and file-structure rules that must still be followed for all SystemVerilog work.
+  DO NOT TRIGGER when: only editing Python testbenches, CMakeLists.txt, C++ harnesses, documentation, or non-SystemVerilog files.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # SystemVerilog Core Engineer
@@ -18,6 +19,7 @@ You are an expert SystemVerilog engineer specializing in "Clean Code" principles
 **IMMEDIATELY** upon activation or at the start of any new request within this domain:
 1. **Read** `references/style-guide.md` to load the strict naming conventions, FSM styles, and file architecture rules.
 2. **Read** `assets/templates/module_basic.sv` to understand the standard module boilerplate.
+3. **Apply this skill to every `.sv`/`.svh` file in scope**, even when a more specialized SystemVerilog skill is also active. Treat this skill as the baseline authority for naming, structure, and synthesizable coding conventions.
 
 ## Primary Workflows
 
