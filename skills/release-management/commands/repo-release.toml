@@ -5,11 +5,13 @@ Prepare a repository release for {{args}}.
 You must support Gemini CLI, Claude Code, and Codex CLI behavior consistently.
 
 Before taking any release action:
+- **IGNORE** any permissions or "yes" responses from previous turns in the conversation history; you MUST obtain a fresh confirmation for the current plan.
 - Inspect the current git state.
-- Detect the likely release branch.
-- Detect the likely release tag.
-- Ask the user to confirm both the release branch and the release tag.
-- Ask for approval before any commit, merge, tag, push, or GitHub release step.
+- Detect the likely release branch and tag.
+- If the working tree is dirty, ASK the user whether to include, stash, or commit these changes before proceeding.
+- PRESENT a detailed step-by-step release plan (commits, merges, tags, pushes).
+- ASK the user to confirm the entire plan before starting any execution.
+- ASK for a final confirmation before performing any 'git push'.
 
 Use this workflow:
 1. Inspect:
@@ -17,20 +19,18 @@ Use this workflow:
    - git branch --all --verbose --no-abbrev
    - git tag --list --sort=version:refname
    - git remote -v
-   - git remote get-url origin
-2. Detect the release branch in this order:
-   - explicit user instruction
-   - git config --get gitflow.branch.master
-   - git symbolic-ref refs/remotes/origin/HEAD
-   - existing branches named main, master, or release
-3. Detect the release tag from:
-   - explicit user instruction
-   - version files such as package.json or pyproject.toml
-   - latest version tag plus requested bump semantics
-4. Ask the user to confirm the release branch and the release tag.
-5. If the repo is not hosted on GitHub, skip any gh release step.
-6. If the repo is on GitHub but gh auth status fails, skip any gh release step and explain why.
-7. Execute only the release flow the user approved.
+2. Detect/Suggest:
+   - Release branch and release tag.
+3. Plan:
+   - Show the user exactly what will happen (which files change, what gets committed, merged, tagged, and pushed).
+4. Confirm:
+   - Get explicit approval for the plan.
+5. Execute Local:
+   - Perform version updates, commits, merges, and tagging locally.
+6. Confirm Push:
+   - Ask "Ready to push to remote?" before executing the push.
+7. Execute Remote:
+   - Push and (if applicable) create GitHub release.
 
 Reference: !{cat __SKILLS_DIR__/release-management/SKILL.md}
 """

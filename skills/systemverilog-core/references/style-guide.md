@@ -510,8 +510,14 @@ logic [7:0] data_c;
 | NBA in functions         | Functions use `=` only — NBA on return / output args is wrong |
 | X-optimism               | Explicit resets, assertions                                  |
 | Width mismatch           | Explicit casts                                               |
-| `logic` vs `wire`        | Use `logic` unless tri-state                                 |
+| `logic` vs `wire`        | Use `logic` for all RTL signals and ports; `wire` only for true tri-state/inout nets |
 | `force`/`release`        | Never in synthesizable RTL                                   |
+
+#### `logic`-Only Rule For RTL
+
+In synthesizable SystemVerilog design code, declare ports and internal signals as `logic` by default. Do not declare `wire` for ordinary combinational connectivity, intermediate nets, or outputs driven by `assign` or `always_comb`; SystemVerilog `logic` covers those cases and keeps declaration style consistent across combinational and sequential paths.
+
+Use `wire` only when modeling a real net semantics requirement such as a true tri-state bus or an `inout` connection with multiple drivers. If the design does not need those semantics, `logic` is mandatory.
 
 #### Race-Condition Rules (RTL)
 

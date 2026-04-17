@@ -10,6 +10,7 @@ Check for:
 - Local reasoning
 - Clarity over cleverness
 - Hidden coupling
+- Inconsistent RTL declaration style: flag `wire` in synthesizable RTL and recommend `logic` unless true tri-state or `inout` behavior is required
 
 Do not confirm correctness. Only report violations with file, line, and what is wrong.
 If you find nothing, say so in one line — do not pad with praise.

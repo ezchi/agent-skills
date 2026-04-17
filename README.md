@@ -6,6 +6,8 @@ A collection of specialized [Gemini CLI](https://github.com/google/gemini-cli), 
 
 These skills provide structured personas, expert workflows, and high-quality templates to ensure hardware designs are readable, maintainable, and compatible with modern engineering tools like Verilator and Cocotb.
 
+For synthesizable SystemVerilog RTL, the shared style guide requires `logic` for normal ports and internal signals; `wire` is reserved only for true tri-state or `inout` net semantics.
+
 ### Supported Agents
 - **Gemini CLI**: Full support for skills and custom slash commands.
 - **Claude Code**: Support for skills and custom instructions.

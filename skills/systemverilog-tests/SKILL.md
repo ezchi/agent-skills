@@ -7,7 +7,7 @@ description: |
   TRIGGER when: creating, modifying, or reviewing SystemVerilog testbench files (`*_tb.sv`), or user asks to write SV-based tests, self-checking testbenches, or stimulus drivers in SystemVerilog.
   DO NOT TRIGGER when: writing Python/Cocotb tests, editing RTL design files, or working on build infrastructure.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   depends_on:
     - systemverilog-core
 ---
@@ -110,6 +110,7 @@ Before writing any testbench code, create and present a test plan for user appro
 - **Drive random garbage:** When `valid` is low, drive random data on buses.
 - **Verilator Compatibility:** Adhere to `references/verilator-compatibility.md`.
 - **Delay Task:** Use `delay_cc(n)` for cycle-based delays.
+- **Style-Gate Completion:** After any testbench code change, run a style-guide check against `references/test-style-guide.md` and the baseline `systemverilog-core` style guide, then fix all violations before finishing.
 
 ### Review Checklist:
 - Does it follow the **FPGA Verification Expert Workflow**?
@@ -118,6 +119,7 @@ Before writing any testbench code, create and present a test plan for user appro
 - Is there **Functional Coverage** or just "tests passed"?
 - Are there **Stress tests** and **Negative/Error-path tests**?
 - Has **Assertion Density** been maximized?
+- Was a post-edit style-guide check run, and were all reported violations fixed?
 
 ---
 
