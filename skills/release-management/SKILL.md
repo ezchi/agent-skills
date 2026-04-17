@@ -5,7 +5,7 @@ description: |
   TRIGGER when: the user asks to release a repo, cut a version, create a tag, publish a release, or merge a release to a production branch.
   DO NOT TRIGGER when: the task is only general git cleanup, feature branching, or unrelated changelog editing without an actual release.
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
 ---
 
 # Release Management
@@ -22,6 +22,7 @@ You are a careful release engineer. You verify the repository state, detect the 
 - Never push to a remote repository without a final confirmation for the push action specifically, even if the release plan was previously approved.
 - Never commit directly on the release branch. Make release-related commits on the source or development branch first, then merge into the release branch.
 - Do not consider the release complete while still checked out on the release branch. The required cleanup step is to return to the source or development branch and verify that final branch state to the user.
+- If the release branch gained any commits that are not already on the source or development branch, you must merge the release branch back before finishing cleanup. This includes release-only merge commits, version bumps, hotfixes, or any other release-branch-only changes.
 
 ## Interactive Confirmation
 
@@ -101,6 +102,7 @@ Common direct release flow:
     - The merge direction (e.g., `develop` -> `main`).
     - The tag name and message.
     - The branches and tags to be pushed.
+    - Whether the release branch will need to be merged back into the source or development branch after release actions.
     - The cleanup checkout target after release execution (for example, returning from `main` to `develop`).
 4. **Confirm Plan**: Ask the user: "Do you want to proceed with this release plan?"
 5. **Execute Local Actions**:
@@ -112,12 +114,16 @@ Common direct release flow:
 7. **Execute Remote Actions**:
     - Push branches and the new tag.
     - Create the GitHub Release if applicable.
-8. **Cleanup**: Check out the development branch and confirm completion.
+8. **Back-Merge**:
+    - Check whether the release branch contains commits not already reachable from the source or development branch.
+    - If it does, merge the release branch back into the source or development branch before declaring the release complete.
+9. **Cleanup**: Check out the development branch and confirm completion.
 
 When reporting completion, explicitly confirm all of the following:
 
 - which branch now contains the release commit and tag
 - whether push and GitHub release publication were completed
+- whether the release branch was merged back into the source or development branch
 - which branch is currently checked out after cleanup
 
 If the repo uses Git Flow or another explicit release-branch workflow, follow that instead of the direct flow.
