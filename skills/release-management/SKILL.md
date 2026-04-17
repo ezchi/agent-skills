@@ -5,7 +5,7 @@ description: |
   TRIGGER when: the user asks to release a repo, cut a version, create a tag, publish a release, or merge a release to a production branch.
   DO NOT TRIGGER when: the task is only general git cleanup, feature branching, or unrelated changelog editing without an actual release.
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Release Management
@@ -21,6 +21,7 @@ You are a careful release engineer. You verify the repository state, detect the 
 - If the working tree is dirty (has uncommitted changes), you **must** stop and ask the user how to proceed (e.g., commit them first, stash them, or include them in the release). Do not automatically commit existing code changes.
 - Never push to a remote repository without a final confirmation for the push action specifically, even if the release plan was previously approved.
 - Never commit directly on the release branch. Make release-related commits on the source or development branch first, then merge into the release branch.
+- Do not consider the release complete while still checked out on the release branch. The required cleanup step is to return to the source or development branch and verify that final branch state to the user.
 
 ## Interactive Confirmation
 
@@ -100,6 +101,7 @@ Common direct release flow:
     - The merge direction (e.g., `develop` -> `main`).
     - The tag name and message.
     - The branches and tags to be pushed.
+    - The cleanup checkout target after release execution (for example, returning from `main` to `develop`).
 4. **Confirm Plan**: Ask the user: "Do you want to proceed with this release plan?"
 5. **Execute Local Actions**:
     - Update version files.
@@ -111,5 +113,11 @@ Common direct release flow:
     - Push branches and the new tag.
     - Create the GitHub Release if applicable.
 8. **Cleanup**: Check out the development branch and confirm completion.
+
+When reporting completion, explicitly confirm all of the following:
+
+- which branch now contains the release commit and tag
+- whether push and GitHub release publication were completed
+- which branch is currently checked out after cleanup
 
 If the repo uses Git Flow or another explicit release-branch workflow, follow that instead of the direct flow.

@@ -10,6 +10,7 @@ Before taking any release action:
 - Detect the likely release branch and tag.
 - If the working tree is dirty, ASK the user whether to include, stash, or commit these changes before proceeding.
 - PRESENT a detailed step-by-step release plan (commits, merges, tags, pushes).
+- Include the cleanup checkout target in that plan so the user can confirm which branch you will return to after the release.
 - ASK the user to confirm the entire plan before starting any execution.
 - ASK for a final confirmation before performing any 'git push'.
 
@@ -23,6 +24,7 @@ Use this workflow:
    - Release branch and release tag.
 3. Plan:
    - Show the user exactly what will happen (which files change, what gets committed, merged, tagged, and pushed).
+   - State which branch you will check out during cleanup after the release actions finish.
 4. Confirm:
    - Get explicit approval for the plan.
 5. Execute Local:
@@ -31,6 +33,9 @@ Use this workflow:
    - Ask "Ready to push to remote?" before executing the push.
 7. Execute Remote:
    - Push and (if applicable) create GitHub release.
+8. Cleanup:
+   - Check out the source or development branch used before the release flow.
+   - Verify the final checked-out branch to the user before declaring completion.
 
 Reference: !{cat __SKILLS_DIR__/release-management/SKILL.md}
 """
