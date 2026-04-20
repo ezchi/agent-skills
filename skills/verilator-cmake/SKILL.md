@@ -61,6 +61,7 @@ Activate when prompt mentions:
 ## Code Reuse & Organization
 
 * **Reuse before create:** Before adding new CMake functions, macros, or helper scripts, search the existing build system for reusable patterns. Use CMake functions/macros to encapsulate repeated `verilate()` patterns rather than copy-pasting target definitions.
+* **Minimize edits to existing code:** When modifying an existing `CMakeLists.txt`, harness, or helper script, keep changes scoped to what is necessary for the task. Avoid unrelated cleanup or broad restructuring.
 * **Keep build files organized:** One `CMakeLists.txt` per directory level. Use `add_subdirectory()` for multi-module projects rather than listing all sources in a single root file.
 
 ---

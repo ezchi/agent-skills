@@ -10,6 +10,7 @@ description: |
 
 ## Description
 Specialized knowledge for configuring, compiling, and writing SystemVerilog compatible with Verilator. This skill focuses on avoiding C++ conversion pitfalls, ensuring correct build ordering, and using robust coding patterns.
+When changing existing code, minimize edits to the smallest necessary scope. Avoid unrelated refactors, renames, or structural cleanup unless they are required to resolve the Verilator issue.
 
 ## Completion Gate
 If this skill results in changes to any `.sv` or `.svh` file, the work is not complete until a style-guide check has been run against the repository's SystemVerilog style guide and any violations have been fixed or explicitly reported as blockers.
