@@ -31,6 +31,7 @@ Generated scripts and configurations must be self-documenting — use descriptiv
 
 **Reuse first:** Before writing new scripts or configs, search for existing simulation scripts, CTest configurations, and helper functions in the project. Extend them rather than creating parallel infrastructure. Factor repeated patterns (build-run-check) into shared shell functions or CMake macros.
 **Minimize edits to existing code:** When modifying existing scripts, configs, or test flow files, keep changes scoped to what is necessary for the task. Avoid unrelated cleanup or restructuring unless required.
+**Structured valid-qualified buses:** When this skill generates or updates RTL or testbench examples, if a bus has more than one data field qualified by a `valid` signal, define the payload as a `typedef struct packed` instead of separate loose signals.
 
 ---
 

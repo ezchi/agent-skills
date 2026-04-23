@@ -62,6 +62,7 @@ Activate when prompt mentions:
 
 * **Reuse before create:** Before adding new CMake functions, macros, or helper scripts, search the existing build system for reusable patterns. Use CMake functions/macros to encapsulate repeated `verilate()` patterns rather than copy-pasting target definitions.
 * **Minimize edits to existing code:** When modifying an existing `CMakeLists.txt`, harness, or helper script, keep changes scoped to what is necessary for the task. Avoid unrelated cleanup or broad restructuring.
+* **Structured valid-qualified buses:** When generating or updating RTL or testbench examples from this skill, if a bus has more than one data field qualified by a `valid` signal, define the payload as a `typedef struct packed` instead of separate loose signals.
 * **Keep build files organized:** One `CMakeLists.txt` per directory level. Use `add_subdirectory()` for multi-module projects rather than listing all sources in a single root file.
 
 ---
