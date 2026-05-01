@@ -59,6 +59,10 @@ def test_dut_runner(pytestconfig):
 - **Clock Delays:** ALWAYS use a `delay_cc(dut, n)` helper function; DO NOT use `await RisingEdge(dut.clk)` or loops of them directly in the test logic.
 - **Signal Driving:** Drive and sample data ONLY immediately after `RisingEdge(dut.clk)` (inside `delay_cc`). **`FallingEdge` is banned** for driving or sampling — it creates setup/hold races with `posedge`-clocked RTL.
 - **Clock Generators:** Use `cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())`.
+- **Clock Idempotency (Mandatory):** Multiple calls to `cocotb.start_soon(Clock(...).start())` will spawn multiple concurrent clock drivers, causing simulation glitches and corruption. You **must** ensure the clock is started exactly once per test, even if the initialization helper is called multiple times (e.g., for mid-test resets).
+  * **Recommended — Split Helpers:** Provide a `start_clock(dut)` helper that spawns the clock once, and a `reset_dut(dut)` helper that only drives the reset pulse. A top-level `setup_dut(dut)` can call both. Tests that need mid-test reset should call `setup_dut` once at the start, then only `reset_dut` for subsequent resets.
+  * **Alternative — Module-level Guard:** If a single setup helper is required, use a Python module-level boolean flag (e.g., `_clock_started = False`) to guard the clock start call. Do **not** use a flag on the `dut` object itself, as this is unreliable.
+
 - **Initialization:** Use an explicit reset task. Ensure all control signals have known initial values before releasing reset.
 - **SystemVerilog structs:** Always model each RTL `struct` used by the testbench with a dedicated Python class. Do not represent structs as loose dicts, tuples, or anonymous packed integers in drivers, monitors, or scoreboards.
 

@@ -19,14 +19,25 @@ async def delay_cc(dut, cycles=1):
         await RisingEdge(dut.clk)
 
 
+async def start_clock(dut):
+    """Start the simulation clock."""
+    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+
+
 async def reset_dut(dut, cycles=5):
-    """Reset the DUT."""
+    """Drive the reset pulse — call this for mid-test resets."""
     dut.rst.value = 1
     dut.i_valid.value = 0
     dut.i_data.value = random.randint(0, DATA_MASK)  # random data even during reset
     await delay_cc(dut, cycles)
     dut.rst.value = 0
     await delay_cc(dut, 1)
+
+
+async def setup_dut(dut):
+    """Initialize the DUT — starts the clock and drives reset."""
+    await start_clock(dut)
+    await reset_dut(dut)
 
 
 async def drive_txn(dut, data):
@@ -53,8 +64,7 @@ async def drive_with_random_gap(dut, data):
 @cocotb.test(timeout_time=10, timeout_unit="ms")
 async def test_back_to_back(dut):
     """Send consecutive transactions with zero idle cycles."""
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
-    await reset_dut(dut)
+    await setup_dut(dut)
 
     expected = deque()
     for _ in range(BURST_LEN):
@@ -78,8 +88,7 @@ async def test_back_to_back(dut):
 @cocotb.test(timeout_time=10, timeout_unit="ms")
 async def test_random_gaps(dut):
     """Randomize idle cycles between transactions to test varying throughput."""
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
-    await reset_dut(dut)
+    await setup_dut(dut)
 
     expected = deque()
     for _ in range(BURST_LEN):
@@ -98,8 +107,7 @@ async def test_random_gaps(dut):
 @cocotb.test(timeout_time=100, timeout_unit="ms")
 async def test_stress(dut):
     """Long-running random test with mixed back-to-back and gapped transactions."""
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
-    await reset_dut(dut)
+    await setup_dut(dut)
 
     scoreboard = deque()
     errors = 0
