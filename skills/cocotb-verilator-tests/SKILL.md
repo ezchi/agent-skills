@@ -103,6 +103,8 @@ Before writing any test code, create and present a test plan for user approval f
 ### Implementation Requirements:
 - **Reproducible Randomness:** Rely on the `random_seed` fixture from `conftest.py`. Never call `random.seed()` directly.
 - **Clock Idempotency:** Ensure the clock is started exactly once per test. Use split helpers (`start_clock` + `reset_dut`) or module-level guards to prevent multiple concurrent clock drivers.
+- **SVA Detection:** To detect SVA fires in negative tests, use internal counters (`int unsigned a_<property>_count`) in the bound SVA module. Read them via VPI (`--public-flat-rw`).
+- **SVA Quiet Check:** In positive tests, you MUST explicitly verify all SVA counters remain at zero (e.g., via an `assert_sva_quiet(dut)` helper) because `else $display` is used instead of `$error` to prevent simulation termination.
 - **No `Timer` or `NextTimeStep`:** These triggers are strictly forbidden. Use `RisingEdge(clk)` or `ReadOnly()` only. `Timer` and `NextTimeStep` cause race conditions and are incompatible with Verilator's execution model for synchronous designs.
 - **Timeouts:** Mandatory `timeout` in `@cocotb.test()` to prevent simulation hangs.
 - **Struct Modeling:** Create Python classes for SystemVerilog `struct` types. Do not use ad hoc dicts.

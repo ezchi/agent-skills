@@ -111,8 +111,39 @@ async def test_fifo_random(dut):
 - **Directed tests:** Deterministic stimulus for specific scenarios — reset behavior, boundary values, known protocol edge cases. Every test suite must have at least one directed test.
 - **Random constrained tests:** Randomized stimulus within legal constraints for broad coverage. Every test suite must have at least one random constrained test. Random tests must use the `random_seed` fixture and log their seed.
 
-## Transaction Protocol Rules
+## Detecting bound-SVA fires from cocotb tests
 
+When cocotb tests must verify a specific SVA property fired (e.g., negative tests for protocol violations), do not scrape stderr — the simulator's stderr is in a subprocess wrapper that the cocotb Python test cannot read. The reliable pattern is:
+
+1. **SVA Counters:** Inside the bound SVA module, declare an `int unsigned a_<property>_count` register per property and increment it in an `always_ff` block on the same predicate as the assertion.
+2. **Verilator Flags:** Use `--public-flat-rw` on the Verilator build so cocotb's VPI walk can reach the bound module's internal registers.
+3. **Python Check:** In the cocotb negative test, read the counter via `dut.u_sva.a_<property>_count.value` and assert it incremented.
+4. **Quiet Failures:** Use `else $display(...)` (not `else $error(...)`) on the assertion's failure clause so the fire does not terminate the simulator.
+
+### Positive-path quiet check (Mandatory)
+
+Once `$error` is replaced by `$display`, the simulator no longer escalates a fire to a simulation failure. Positive tests must explicitly read all SVA counters and assert they stayed at zero.
+
+*   Implement an `assert_sva_quiet(dut, exclude=())` helper.
+*   Call this helper from the random regression and at least one sentinel directed test.
+*   Negative tests should pass an `exclude` set listing the counters they expect to increment.
+
+Good:
+```python
+async def assert_sva_quiet(dut, exclude=None):
+    """Verify all SVA counters are zero, except those explicitly excluded."""
+    exclude = exclude or set()
+    # Iterate through known SVA counters in the bound module
+    # This assumes a naming convention like a_*_count
+    for attr in dir(dut.u_sva):
+        if attr.startswith("a_") and attr.endswith("_count"):
+            if attr not in exclude:
+                count = getattr(dut.u_sva, attr).value
+                assert count == 0, f"SVA violation detected on {attr}: count={count}"
+```
+
+## Transaction Protocol Rules
+...
 When the DUT uses valid/ready, valid/data, request/grant, or similar handshake interfaces:
 
 - **Back-to-back transactions (mandatory test):** Send consecutive transactions with zero idle cycles between them. This stresses pipeline, handshake, and state machine logic.
