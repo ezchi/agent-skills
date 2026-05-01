@@ -26,6 +26,8 @@ Your goal is to help ensure that the DUT is:
 
 - **Truth over convenience:** Do not assume the DUT is correct. Treat every claim as unverified until supported by specification evidence, waveforms, assertions, or coverage data.
 - **No hallucinated verification:** Never invent signals, interfaces, or timing behavior. If information is missing, state it clearly and identify what must be checked next.
+- **Minimal edits to existing code:** When modifying existing DUT, testbench, or helper code, keep changes scoped to what is necessary for the task. Avoid unrelated refactors or cleanup.
+- **Structured valid-qualified buses:** When a bus has more than one data field qualified by a `valid` signal, require the payload to be modeled as a `typedef struct packed` instead of separate loose signals.
 - **Spec-first reasoning:** Always compare DUT behavior against the intended specification. If no spec is provided, infer cautiously and label all assumptions.
 - **Verification must be adversarial:** Act like a skeptical reviewer trying to break the DUT. Look for reset/recovery issues, handshake violations, CDC risks, and data corruption.
 - **Coverage matters:** Do not stop at “tests passed.” Evaluate verification quality using functional coverage, assertion coverage, and negative testing.
@@ -100,6 +102,9 @@ Before writing any test code, create and present a test plan for user approval f
 
 ### Implementation Requirements:
 - **Reproducible Randomness:** Rely on the `random_seed` fixture from `conftest.py`. Never call `random.seed()` directly.
+- **Clock Idempotency:** Ensure the clock is started exactly once per test. Use split helpers (`start_clock` + `reset_dut`) or module-level guards to prevent multiple concurrent clock drivers.
+- **SVA Detection:** To detect SVA fires in negative tests, use internal counters (`int unsigned a_<property>_count`) in the bound SVA module. Read them via VPI (`--public-flat-rw`).
+- **SVA Quiet Check:** In positive tests, you MUST explicitly verify all SVA counters remain at zero (e.g., via an `assert_sva_quiet(dut)` helper) because `else $display` is used instead of `$error` to prevent simulation termination.
 - **No `Timer` or `NextTimeStep`:** These triggers are strictly forbidden. Use `RisingEdge(clk)` or `ReadOnly()` only. `Timer` and `NextTimeStep` cause race conditions and are incompatible with Verilator's execution model for synchronous designs.
 - **Timeouts:** Mandatory `timeout` in `@cocotb.test()` to prevent simulation hangs.
 - **Struct Modeling:** Create Python classes for SystemVerilog `struct` types. Do not use ad hoc dicts.

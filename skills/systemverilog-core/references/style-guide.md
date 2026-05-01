@@ -801,6 +801,10 @@ Code must be the primary documentation. Use meaningful names, semantic typedefs,
 * **Comment why, never what.** The only acceptable comments explain non-obvious intent: design trade-offs, hardware constraints, protocol quirks, workarounds, or references to specifications.
 * **Delete stale comments.** A wrong comment is worse than no comment. When refactoring code, remove or update any comments that no longer apply.
 * **Do not comment obvious code.** `// increment counter` on `counter <= counter + 1` adds noise. Trust the reader to understand basic constructs.
+* **Avoid "verilator" in block comments.** Verilator's pragma parser triggers on the literal word `verilator` anywhere inside a block comment (`/* ... */`), which can cause `BADVLTPRAGMA` errors.
+  * Use line comments (`// ...`) for free-form prose that mentions the tool.
+  * Rephrase to "the simulator" or "the linter" if block comments must be used.
+  * Reserve `/* verilator ... */` exclusively for actual tool directives.
 
 Good — self-documenting names make comments unnecessary:
 ```systemverilog
@@ -891,6 +895,7 @@ You are generating SystemVerilog code following a strict clean-code RTL & verifi
 - Prefer explicit imports (import pkg::symbol) over wildcard in RTL
 - Reuse first: search existing modules, packages, and types before creating new ones; extend or parameterize, don't duplicate
 - Self-documenting code over comments: use meaningful names, typedefs, and structure; only comment *why*, never *what*
+- Avoid "verilator" in block comments: Use // for prose mentioning the tool; reserve /* verilator ... */ for actual directives
 - Prefer clarity and maintainability over compactness
 ```
 

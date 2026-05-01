@@ -59,6 +59,10 @@ def test_dut_runner(pytestconfig):
 - **Clock Delays:** ALWAYS use a `delay_cc(dut, n)` helper function; DO NOT use `await RisingEdge(dut.clk)` or loops of them directly in the test logic.
 - **Signal Driving:** Drive and sample data ONLY immediately after `RisingEdge(dut.clk)` (inside `delay_cc`). **`FallingEdge` is banned** for driving or sampling — it creates setup/hold races with `posedge`-clocked RTL.
 - **Clock Generators:** Use `cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())`.
+- **Clock Idempotency (Mandatory):** Multiple calls to `cocotb.start_soon(Clock(...).start())` will spawn multiple concurrent clock drivers, causing simulation glitches and corruption. You **must** ensure the clock is started exactly once per test, even if the initialization helper is called multiple times (e.g., for mid-test resets).
+  * **Recommended — Split Helpers:** Provide a `start_clock(dut)` helper that spawns the clock once, and a `reset_dut(dut)` helper that only drives the reset pulse. A top-level `setup_dut(dut)` can call both. Tests that need mid-test reset should call `setup_dut` once at the start, then only `reset_dut` for subsequent resets.
+  * **Alternative — Module-level Guard:** If a single setup helper is required, use a Python module-level boolean flag (e.g., `_clock_started = False`) to guard the clock start call. Do **not** use a flag on the `dut` object itself, as this is unreliable.
+
 - **Initialization:** Use an explicit reset task. Ensure all control signals have known initial values before releasing reset.
 - **SystemVerilog structs:** Always model each RTL `struct` used by the testbench with a dedicated Python class. Do not represent structs as loose dicts, tuples, or anonymous packed integers in drivers, monitors, or scoreboards.
 
@@ -107,8 +111,39 @@ async def test_fifo_random(dut):
 - **Directed tests:** Deterministic stimulus for specific scenarios — reset behavior, boundary values, known protocol edge cases. Every test suite must have at least one directed test.
 - **Random constrained tests:** Randomized stimulus within legal constraints for broad coverage. Every test suite must have at least one random constrained test. Random tests must use the `random_seed` fixture and log their seed.
 
-## Transaction Protocol Rules
+## Detecting bound-SVA fires from cocotb tests
 
+When cocotb tests must verify a specific SVA property fired (e.g., negative tests for protocol violations), do not scrape stderr — the simulator's stderr is in a subprocess wrapper that the cocotb Python test cannot read. The reliable pattern is:
+
+1. **SVA Counters:** Inside the bound SVA module, declare an `int unsigned a_<property>_count` register per property and increment it in an `always_ff` block on the same predicate as the assertion.
+2. **Verilator Flags:** Use `--public-flat-rw` on the Verilator build so cocotb's VPI walk can reach the bound module's internal registers.
+3. **Python Check:** In the cocotb negative test, read the counter via `dut.u_sva.a_<property>_count.value` and assert it incremented.
+4. **Quiet Failures:** Use `else $display(...)` (not `else $error(...)`) on the assertion's failure clause so the fire does not terminate the simulator.
+
+### Positive-path quiet check (Mandatory)
+
+Once `$error` is replaced by `$display`, the simulator no longer escalates a fire to a simulation failure. Positive tests must explicitly read all SVA counters and assert they stayed at zero.
+
+*   Implement an `assert_sva_quiet(dut, exclude=())` helper.
+*   Call this helper from the random regression and at least one sentinel directed test.
+*   Negative tests should pass an `exclude` set listing the counters they expect to increment.
+
+Good:
+```python
+async def assert_sva_quiet(dut, exclude=None):
+    """Verify all SVA counters are zero, except those explicitly excluded."""
+    exclude = exclude or set()
+    # Iterate through known SVA counters in the bound module
+    # This assumes a naming convention like a_*_count
+    for attr in dir(dut.u_sva):
+        if attr.startswith("a_") and attr.endswith("_count"):
+            if attr not in exclude:
+                count = getattr(dut.u_sva, attr).value
+                assert count == 0, f"SVA violation detected on {attr}: count={count}"
+```
+
+## Transaction Protocol Rules
+...
 When the DUT uses valid/ready, valid/data, request/grant, or similar handshake interfaces:
 
 - **Back-to-back transactions (mandatory test):** Send consecutive transactions with zero idle cycles between them. This stresses pipeline, handshake, and state machine logic.

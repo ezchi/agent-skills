@@ -10,6 +10,7 @@ description: |
 
 ## Description
 Specialized knowledge for configuring, compiling, and writing SystemVerilog compatible with Verilator. This skill focuses on avoiding C++ conversion pitfalls, ensuring correct build ordering, and using robust coding patterns.
+When changing existing code, minimize edits to the smallest necessary scope. Avoid unrelated refactors, renames, or structural cleanup unless they are required to resolve the Verilator issue.
 
 ## Completion Gate
 If this skill results in changes to any `.sv` or `.svh` file, the work is not complete until a style-guide check has been run against the repository's SystemVerilog style guide and any violations have been fixed or explicitly reported as blockers.
@@ -26,8 +27,10 @@ If this skill results in changes to any `.sv` or `.svh` file, the work is not co
 ## 2. SystemVerilog Coding Best Practices
 
 *   **Reuse First:** Before writing new workaround code or helper functions, search the codebase for existing solutions to the same Verilator limitation. Consolidate Verilator-specific patterns into shared packages or modules rather than scattering them across files.
-*   **Self-Documenting Code First:** Use meaningful names, semantic typedefs, and clear structure so intent is obvious without comments. Only comment *why* (e.g., Verilator workaround rationale), never *what* the code does.
-*   **Dynamic Arrays & Queues:**
+*   **Structured valid-qualified buses:** When a bus has more than one data field qualified by a `valid` signal, define that payload as a `typedef struct packed` instead of separate loose signals.
+* **Self-Documenting Code First:** Use meaningful names, semantic typedefs, and clear structure so intent is obvious without comments. Only comment *why* (e.g., Verilator workaround rationale), never *what* the code does.
+* **Avoid "verilator" in block comments:** Verilator's pragma parser triggers on the word `verilator` inside any `/* ... */` comment. Use line comments (`// ...`) for free-form mentions of the tool to avoid `%Error-BADVLTPRAGMA`.
+* **Dynamic Arrays & Queues:**
     *   **No Variable Slicing:** Verilator does *not* support variable-indexed slicing on dynamic arrays (e.g., `dyn_arr[i +: 4]` is illegal).
     *   **Workaround:** Copy the desired chunk into a fixed-size temporary array or scalar inside a loop, then process that temporary variable.
 *   **Streaming Operators (`<<`, `>>`):**
